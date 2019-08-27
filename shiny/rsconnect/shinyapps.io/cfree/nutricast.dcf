@@ -1,0 +1,12 @@
+name: nutricast
+title: nutricast
+username:
+account: cfree
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1116122
+bundleId: 2358008
+url: https://cfree.shinyapps.io/nutricast/
+when: 1566858617.8195
+asMultiple: FALSE
+asStatic: FALSE
