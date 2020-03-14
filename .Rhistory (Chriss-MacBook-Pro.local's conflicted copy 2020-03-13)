@@ -1,0 +1,512 @@
+select(-key) %>%
+select(iso3, country, age_range, sex, nutrient, units_long, units_short, stat, value, everything())
+# Format data
+data <- data_orig %>%
+# Rearrange columns
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+arrange(iso3, age_range) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Add nutrient and stat
+left_join(header_info, by=c("key"="col_name")) %>%
+# Format units
+rename(units_long=units) %>%
+mutate(units_short=gsub("/person/day", "", units_long)) %>%
+# Arrange columns
+select(-key) %>%
+select(iso3, country, age_range, sex, nutrient, units_long, units_short, stat, value, everything()) %>%
+# Spread stats
+spread(key="stat", value="value")
+View(data)
+# Format data
+data <- data_orig %>%
+# Rearrange columns
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+arrange(iso3, age_range) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Add nutrient and stat
+left_join(header_info, by=c("key"="col_name")) %>%
+# Format units
+rename(units_long=units) %>%
+mutate(units_short=gsub("/person/day", "", units_long)) %>%
+# Arrange columns
+select(-key) %>%
+select(iso3, country, age_range, sex, nutrient, units_long, units_short, stat, value, everything()) %>%
+# Spread stats
+spread(key="stat", value="value") %>%
+rename(value_med=md, value_lo=lo, value_hi=hi)
+# Format data
+data <- data_orig %>%
+# Rearrange columns
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+arrange(iso3, age_range) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Add nutrient and stat
+left_join(header_info, by=c("key"="col_name")) %>%
+# Format units
+rename(units_long=units) %>%
+mutate(units_short=gsub("/person/day", "", units_long)) %>%
+# Arrange columns
+select(-key) %>%
+select(iso3, country, age_range, sex, nutrient, units_long, units_short, stat, value, everything()) %>%
+# Spread stats
+spread(key="stat", value="value") %>%
+rename(value_med=md, value_lo=lo, value_hi=hi) %>%
+select(iso3:units_short, value_med, value_lo, value_hi, everything())
+# Inspect
+str(data)
+# Example plot
+g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex)) +
+facet_wrap(~nutrient, ncol=4) +
+geom_bar() +
+theme_bw()
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex)) +
+facet_wrap(~nutrient, ncol=4) +
+geom_bar(stat="identity") +
+theme_bw()
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity") +
+theme_bw()
+g
+View(data)
+# Example plot
+g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity") +
+theme_bw()
+g
+?geom_bar
+# Example plot
+g <- ggplot(data %>% filter(country=="Ghana" & nutrient=="calcium"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity") +
+theme_bw()
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Ghana" & nutrient=="calcium"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw()
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Germany" & nutrient=="calcium"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw()
+g
+# Export
+saveRDS(data, file=file.path(outputdir, "genus_nutrient_supplies_by_age_sex_2011.Rds"))
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan" & nutrient=="calcium"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw()
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw()
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+theme(legend.position = "bottom")
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom")
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 0.5))
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 1))
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 0.5, hjuts=0))
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Japan"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="France"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+g
+# Example plot
+g <- ggplot(data %>% filter(country=="Canada"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+g
+# Files
+files_merge <- list.files(file.path(inputdir, "nutrient_totals_by_age_sex"), pattern=".csv")
+# Example data
+exdata <- read.csv(file.path(inputdir, "nutrient_totals_by_age_sex", files_merge[1]), as.is=T, na.strings="*")
+# Header info
+header_info <-  read.csv(file.path(inputdir, "nutrient_totals_by_age_sex", x), as.is=T, nrows=3, header=F, na.strings="*") %>%
+select(4:ncol(.)) %>% t() %>%
+as.data.frame(stringsAsFactors=F) %>%
+rename(nutrient=V1, stat=V2, units=V3) %>%
+mutate(stat=recode(stat, "High 95% UI"="hi", "Low 95% UI"="lo", "Median"="md"),
+col_name=paste(nutrient, stat, sep="_"))
+# Column names
+col_names <- c("iso3", "country", "blank", header_info$col_name)
+# Merge
+x <- files_merge[1]
+data_orig <- purrr::map_df(files_merge, function(x) {
+# Get sex
+sex <- strsplit(x, split="_")[[1]][3] %>%
+gsub(".csv", "", .)
+# Get age range
+age_range <- strsplit(x, split="_")[[1]][2] %>%
+gsub("age", "", .)
+# Read data
+fdata <- read.csv(file.path(inputdir, "nutrient_totals_by_age_sex", x), as.is=T, skip=3, na.strings="*", col.names = col_names) %>%
+mutate(age_range=age_range,
+sex=sex) %>%
+select(age_range, sex, everything())
+})
+# Format data
+data <- data_orig %>%
+# Rearrange columns
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+arrange(iso3, age_range) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Add nutrient and stat
+left_join(header_info, by=c("key"="col_name")) %>%
+# Format units
+rename(units_long=units) %>%
+mutate(units_short=gsub("/person/day", "", units_long)) %>%
+# Arrange columns
+select(-key) %>%
+select(iso3, country, age_range, sex, nutrient, units_long, units_short, stat, value, everything()) %>%
+# Spread stats
+spread(key="stat", value="value") %>%
+rename(value_med=md, value_lo=lo, value_hi=hi) %>%
+select(iso3:units_short, value_med, value_lo, value_hi, everything())
+# Inspect
+str(data)
+# Example plot
+g <- ggplot(data %>% filter(country=="Canada"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+g
+# Export
+saveRDS(data, file=file.path(outputdir, "genus_nutrient_supplies_by_age_sex_2011.Rds"))
+# Example plot
+g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+facet_wrap(~nutrient, ncol=4, scale="free_y") +
+geom_bar(stat="identity", position="dodge") +
+theme_bw() +
+labs(x="Age range", y="Daily per capita supply") +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+g
+# Clear workspace
+rm(list = ls())
+# Setup
+################################################################################
+# Packages
+library(ggplot2)
+library(tidyverse)
+# Directories
+inputdir <- "data/genus/raw"
+outputdir <- "data/genus/processed"
+# The GENuS Dataverse:
+# https://dataverse.harvard.edu/dataverse/GENuS
+# GENuS datasets
+# 1. Food composition tables for GENuS
+# 2. Nutrient Totals (incl. Fortification) by Age and Sex (2011)
+# 3. Edible Food by Age and Sex (2011)
+# 4. Nutrient Totals by Age and Sex (2011)
+# 5. Total Nutrient Supplies by Country and Year
+# 6. Nutrient Supplies by Food and Country (2011)
+# 7. Total Nutrient Supply including Fortification (2011)
+# 8. Edible Food by Country and Year
+# Files
+files_merge <- list.files(file.path(inputdir, "edible_food_by_age_sex"), pattern=".csv")
+# Example data
+exdata <- read.csv(file.path(inputdir, "edible_food_by_age_sex", files_merge[1]), as.is=T, na.strings="*")
+# Header info
+header_info <-  read.csv(file.path(inputdir, "edible_food_by_age_sex", files_merge[1]), as.is=T, nrows=3, header=F, na.strings="*") %>%
+select(4:ncol(.)) %>% t() %>%
+as.data.frame(stringsAsFactors=F) %>%
+rename(food=V1, stat=V2, units=V3) %>%
+mutate(stat=recode(stat, "High 95% UI"="hi", "Low 95% UI"="lo", "Median"="md"),
+col_names=paste(food, stat, sep="_"))
+col_names <- c("iso3", "country", "blank", header_info$col_names)
+# Merge data
+x <- files_merge[1]
+data_orig <- purrr::map_df(files_merge, function(x) {
+# Get sex
+sex <- strsplit(x, split="_")[[1]][4] %>%
+gsub(".csv", "", .)
+# Get age range
+age_range <- strsplit(x, split="_")[[1]][3] %>%
+gsub(".csv", "", .)
+# Read data
+fdata <- read.csv(file.path(inputdir, "edible_food_by_age_sex", x),
+as.is=T, skip=3, na.strings="*", col.names=col_names) %>%
+mutate(age_range=age_range,
+sex=sex) %>%
+select(age_range, sex, everything())
+})
+# Format data
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything())
+# Format data
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.))
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+stat=ifelse(grepl("_md", key), "median",
+ifelse(grepl("_lo", key), "low", "high")))
+# Format data
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+stat=ifelse(grepl("_md", key), "median",
+ifelse(grepl("_lo", key), "low", "high"))) %>%
+# Reshape
+spread(key="stat", value="value") %>%
+rename(value_md=median, value_lo=low, value_hi=high)
+View(data)
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+stat=ifelse(grepl("_md", key), "median",
+ifelse(grepl("_lo", key), "low", "high")))
+View(data)
+?spread
+vignette("pivot")
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+stat=ifelse(grepl("_md", key), "median",
+ifelse(grepl("_lo", key), "low", "high")))
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+stat=ifelse(grepl("_md", key), "median",
+ifelse(grepl("_lo", key), "low", "high"))) %>%
+select(iso3, country, age_range, sex, food_name_messy, stat, value)
+# Format data
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+stat=ifelse(grepl("_md", key), "median",
+ifelse(grepl("_lo", key), "low", "high"))) %>%
+select(iso3, country, age_range, sex, food_name_messy, stat, value) %>%
+# Reshape
+spread(key="stat", value="value") %>%
+rename(value_md=median, value_lo=low, value_hi=high)
+View(data)
+# Format data
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+stat=ifelse(grepl("_md", key), "median",
+ifelse(grepl("_lo", key), "low", "high"))) %>%
+select(iso3, country, age_range, sex, food_name_messy, stat, value) %>%
+# Reshape
+spread(key="stat", value="value") %>%
+rename(value_md=median, value_lo=low, value_hi=high) %>%
+# Format age/sex
+mutate(age_range=gsub("age", "", age_range),
+sex=recode(sex, "bothsexes"="both"))
+View(data)
+View(header_info)
+# Format data
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+stat=ifelse(grepl("_md", key), "median",
+ifelse(grepl("_lo", key), "low", "high")))
+View(data)
+View(header_info)
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Format food/stat
+left_join(header_info, c("key"="col_names"))
+# mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+#        stat=ifelse(grepl("_md", key), "median",
+#                    ifelse(grepl("_lo", key), "low", "high"))) %>%
+select(iso3, country, age_range, sex, food, units, stat, value) %>%
+# Reshape
+spread(key="stat", value="value")
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Add food, units, stat
+left_join(header_info, c("key"="col_names")) %>%
+# mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+#        stat=ifelse(grepl("_md", key), "median",
+#                    ifelse(grepl("_lo", key), "low", "high"))) %>%
+select(iso3, country, age_range, sex, food, units, stat, value)
+View(data)
+data <- data_orig %>%
+# Remove blank column
+select(-blank) %>%
+select(iso3, country, age_range, sex, everything()) %>%
+# Convert wide-to-long
+gather(key="key", value="value", 5:ncol(.)) %>%
+# Arrange
+arrange(iso3, age_range) %>%
+# Add food, units, stat
+left_join(header_info, c("key"="col_names")) %>%
+# mutate(food_name_messy=gsub("_md|_lo|_hi", "", key),
+#        stat=ifelse(grepl("_md", key), "median",
+#                    ifelse(grepl("_lo", key), "low", "high"))) %>%
+select(iso3, country, age_range, sex, key, food, units, stat, value)
+shiny::runApp('shiny/v2')
+# Clear workspace
+rm(list = ls())
+# Setup
+################################################################################
+# Packages
+library(ggplot2)
+library(tidyverse)
+# Directories
+genusdir <- "data/genus/processed"
+# Nutrient supply by country and year
+nut_cntry_yr_orig <- read.rds(file.path(genusdir, "genus_nutrient_supplies_by_cntry_year.Rds"))
+# Nutrient supply by country and year
+nut_cntry_yr_orig <- readRDS(file.path(genusdir, "genus_nutrient_supplies_by_cntry_year.Rds"))
+sort(unique(nut_cntry_yr_orig$nutrient))
