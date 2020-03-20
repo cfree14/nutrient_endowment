@@ -12,9 +12,9 @@ library(ggplot2)
 library(tidyverse)
 
 # Directories
-inputdir <- "data/nutrient_content/raw"
-outputdir <- "data/nutrient_content/processed"
-plotdir <- "data/nutrient_content/figures"
+inputdir <- "data/vaitla_etal_2018/raw"
+outputdir <- "data/vaitla_etal_2018/processed"
+plotdir <- "data/vaitla_etal_2018/figures"
 
 # Read data
 load(file.path(outputdir, "Vaitla_etal_2018_nutrient_data.Rdata"))
@@ -24,12 +24,12 @@ load(file.path(outputdir, "Vaitla_etal_2018_nutrient_data.Rdata"))
 ################################################################################
 
 # Format data
-preds_long <- preds_long %>% 
-  mutate(nutrient_title=paste0(nutrient, "\n(", units, ")"))
+preds_long <- nutrient_preds_long %>% 
+  mutate(nutrient_title=paste0(nutrient, "\n(", units_long, ")"))
 
 # Add column to key
-key <- key %>% 
-  mutate(nutrient_title=paste0(nutrient, "\n(", units, ")"))
+key <- nutrient_key %>% 
+  mutate(nutrient_title=paste0(nutrient, "\n(", units_long, ")"))
 
 # Setup theme
 my_theme <- theme(axis.text=element_text(size=8),
@@ -42,7 +42,7 @@ my_theme <- theme(axis.text=element_text(size=8),
                   axis.line = element_line(colour = "black"))
 
 # Histogram nutrient data
-g <- ggplot(preds_long, aes(x=value)) +
+g <- ggplot(preds_long, aes(x=value_md)) +
   geom_histogram(fill="grey70") +
   labs(x="Concentration", y="Number of species") +
   facet_wrap(~nutrient_title, ncol=3, scales="free") +

@@ -55,13 +55,19 @@ data1 <- data_orig %>%
   # Add sex and age range columns
   mutate(sex=ifelse(key=="child", "child", 
                     ifelse(grepl("female", key), "female", "male")),
+         sex=recode(sex, "child"="Children", "male"="Males", "female"="Females"),
          age_range=gsub("female_|male_", "", key),
          age_range=recode(age_range, "child"="1-3"),
          age_range=factor(age_range, levels=c("1-3","4-8", "9-13", 
                                               "14-18", "19-30", "31-50", "51+")),
          value_type=ifelse(grepl("%", nutrient), "categorical", "continuous")) %>% 
+  # Separate nutrients and units
+  rename(nutrient_label=nutrient) %>% 
+  mutate(nutrient=gsub("^(.*?),.*", "\\1", nutrient_label) %>% str_trim(),
+         units=gsub(".*\\,", "", nutrient_label) %>% str_trim(),
+         nutrient_label=paste0(nutrient, " (", units, ")")) %>% 
   # Rearrange
-  select(type, nutrient, source, sex, age_range, value_type, value) %>% 
+  select(type, nutrient_label, nutrient, units, source, sex, age_range, value_type, value) %>% 
   # Format values
   mutate(value=recode(value, 
                       "600c"="600",
@@ -76,7 +82,7 @@ data1 <- data_orig %>%
   # Arrange
   arrange(nutrient, sex, age_range) 
 
-# Seperate
+# Separate into continuous and categorical
 data <- data1 %>% 
   filter(value_type=="continuous") %>% 
   mutate(value=as.numeric(value))
@@ -85,7 +91,7 @@ data_catg <- data1 %>%
 
 # Plot data
 g <- ggplot(data, aes(x=age_range, y=value, fill=sex)) +
-  facet_wrap(~nutrient, ncol=4, scale="free_y") +
+  facet_wrap(~nutrient_label, ncol=4, scale="free_y") +
   geom_bar(stat="identity", position="dodge") +
   labs(x="Age range", y="Daily guideline", title="2015-20 US dietary guidelines") +
   theme_bw() +

@@ -1,0 +1,512 @@
+preds_long <- preds_merged %>%
+# Rename columns
+rename(species_orig=X, species_closest=closestSp,
+value=predVal, value_lo=lcl_predInt, value_hi=ucl_predInt) %>%
+# Format columns
+mutate(species_orig=gsub("_", " ", species_orig),
+species_closest=gsub("_", " ", species_closest)) %>%
+# Add nutrient
+left_join(file_key, by="file") %>%
+# Add units
+left_join(select(key, type, nutrient, units), by="nutrient") %>%
+mutate(nutrient_unit=paste0(nutrient, " (", units, ")")) %>%
+# Rearrange columns
+select(file, type, nutrient_unit, nutrient, units, everything())
+# Reshape data
+preds_wide <- preds_long %>%
+select(nutrient, species_orig, value) %>%
+spread(key="nutrient", value="value") %>%
+# Rename columns
+rename(protein_g="Protein",
+fat_g="Total fat",
+omega3_g="Omega-3 fatty acids",
+omega6_g="Omega-6 fatty acids",
+iron_mg="Iron",
+zinc_mg="Zinc",
+vitA_ug="Vitamin A",
+vitB12_ug="Vitamin B12",
+vitD_ug="Vitamin D")
+# Check species names
+spp_suggest_list <- freeR::suggest_names(preds_wide$species_orig)
+spp_key <- tibble(species_orig=names(spp_suggest_list), species=NA)
+for(i in 1:nrow(spp_key)){
+spp_suggest <- spp_suggest_list[i][[1]]
+spp_suggest1 <- ifelse(length(spp_suggest)==0, "", spp_suggest)
+spp_key$species[i] <- spp_suggest1
+}
+# Add correct names to data and continue to correct
+preds_wide1 <- preds_wide %>%
+left_join(spp_key, by="species_orig") %>%
+select(species, species_orig, everything()) %>%
+mutate(species=ifelse(is.na(species), species_orig, species),
+species=ifelse(species=="", species_orig, species)) %>%
+mutate(species=recode(species,
+# "Corydoras kristinae"="",
+# "Cyprichromis jumbo"="",
+# "Cyprichromis zebra"="",
+"Hemibarbus longibarbis"="Hemibarbus maculatus",
+# "Macrocephenchelys soela"="",
+# "Puntius parvus"="",
+"Sebastes marinus"="Sebastes norvegicus", # WORMS
+"Takifugu fasciatus"="Takifugu fasciatus"))
+# Check names
+freeR::check_names(preds_wide1$species)
+# Add commmon names
+rfishbase::sci_to_common(preds_wide1$species)
+?freeR::fishbase
+# Check names
+spp_key <- freeR::fishbase(dataset="species", species=preds_wide1$species, cleaned=T)
+View(spp_key)
+freeR::complete(spp_key)
+# Try 1. FishBase species page
+spp_key <- freeR::fishbase(dataset="species", species=species, cleaned=F)
+species <- preds_wide1$species[1:20]
+# Try 1. FishBase species page
+spp_key <- freeR::fishbase(dataset="species", species=species, cleaned=F)
+spp_key1 <- spp_key %>%
+select(species, comm_name)
+View(spp_key)
+spp_key1 <- spp_key %>%
+select(species, comm_name)
+View(spp_key)
+# Try 1. FishBase species page
+spp_key <- freeR::fishbase(dataset="species", species=species, cleaned=T)
+spp_key1 <- spp_key %>%
+select(species, comm_name)
+View(spp_key1)
+spp_key1 <- spp_key %>%
+select(species, comm_name) %>%
+arrange(comm_name)
+spp_key1 <- spp_key %>%
+select(species, comm_name) %>%
+arrange(comm_name)
+# Try 2. FishBase common name page
+spp_missing <- spp_key1$species[is.na(spp_key1$comm_name)]
+spp_missing
+?sci_to_common
+spp_key2 <- rfishbase::sci_to_common(species_list=spp_missing, server = "fishbase")
+View(spp_key2)
+spp_key2_english <- spp_key2 %>%
+filter(Language=="English") %>%
+select(Species, CommName) %>%
+rename(species=Species, comm_name=CommName)
+spp_key2_english <- spp_key2 %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+View(spp_key2_english)
+species <- preds_wide1$species[1:100]
+# Try 1. FishBase species page
+spp_key1_orig <- freeR::fishbase(dataset="species", species=species, cleaned=T)
+spp_key1 <- spp_key1_orig %>%
+select(species, comm_name) %>%
+arrange(comm_name)
+spp_key1
+# Try 2. FishBase common name page
+spp_missing_from_try1 <- spp_key1$species[is.na(spp_key1$comm_name)]
+spp_missing_from_try1
+spp_key2_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "fishbase")
+spp_key2 <- spp_key2 %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+spp_missing_from_try1
+# Try 2. FishBase common name page (English names)
+spp_missing_from_try1 <- spp_key1$species[is.na(spp_key1$comm_name)]
+spp_key2_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "fishbase")
+spp_key2_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "fishbase")
+spp_key2_orig
+spp_key2_inv_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "sealifebase")
+View(spp_key2_inv_orig)
+spp_key2_orig <- rbind(spp_key2_fin_orig, spp_key2_inv_orig) %>%
+filter(!is.na(ComName))
+spp_key2_fin_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "fishbase")
+spp_key2_orig <- rbind(spp_key2_fin_orig, spp_key2_inv_orig) %>%
+filter(!is.na(ComName))
+View(spp_key2_orig)
+spp_key2_eng <- spp_key2_orig %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+View(spp_key2_english)
+spp_key2_orig <- rbind(spp_key2_fin_orig, spp_key2_inv_orig) %>%
+filter(!is.na(ComName))
+spp_key2_eng <- spp_key2_orig %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+View(spp_key2_fin_orig)
+rbind(spp_key2_fin_orig, spp_key2_inv_orig)
+spp_key2_orig <- rbind(spp_key2_fin_orig, spp_key2_inv_orig) %>%
+filter(!is.na(ComName))
+View(spp_key2_orig)
+spp_key2_eng <- spp_key2_orig %>%
+filter(Language=="English")
+table(spp_key2_orig$Language)
+View(spp_key2_eng)
+spp_key2_eng <- spp_key2_orig %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+spp_key1 <- spp_key1_orig %>%
+select(species, comm_name) %>%
+filter(!is.na(comm_name))
+species[!species %in% spp_key1$species]
+# Try 2. FishBase common name page (English names)
+spp_missing_from_try1 <- species[!species %in% spp_key1$species]
+# Try 3. FishBase common name page (not English)
+spp_done <- c(spp_key1$species, spp_key2_eng$species)
+spp_missing_from_try12 <- species[!species %in% spp_done]
+spp_missing_from_try12
+spp_key3_orig <- spp_key2_orig %>%
+filter(Language!="English")
+spp_key3_orig <- spp_key2_orig %>%
+filter(species %in% spp_missing_from_try12)
+spp_missing_from_try12 <- species[!species %in% spp_done]
+spp_missing_from_try12
+spp_key3_orig <- spp_key2_orig %>%
+filter(species %in% spp_missing_from_try12)
+spp_key3_orig <- spp_key2_orig %>%
+filter(Species %in% spp_missing_from_try12)
+View(spp_key3_orig)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(grepl("::punct::", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(grepl("[:punct:]", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(!grepl("[:punct:]", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(grepl("[:punct:]", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(grepl("[[:punct:]]", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(grepl("[:punct:]", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(!grepl("[:punct:]", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(!grepl("[[:punct:]]", Species))
+View(spp_key3_orig)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with punctuation
+filter(grepl("[[:punct:]]", Species))
+!
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12)
+View(spp_key3_orig)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(grepl("?", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(grepl("/?", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(grepl("\\?", Species))
+View(spp_key3_orig)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(grepl("\?", Species))
+?grepls
+?grepl
+grepl("\?", spp_key2_orig$Species)
+grepl("\\?", spp_key2_orig$Species)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(grepl("\\?", Species))
+str(spp_key2_orig)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(grepl("\\?", Species %>%  as.character()))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(grep("\\?", Species))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(grepl("\\?", ComName))
+View(spp_key3_orig)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove species with ?s
+filter(!grepl("\\?", ComName))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+filter(!grepl("[:punct:]", ComName))
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+# filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, ComName=comm_name)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+# filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+View(spp_key3_orig)
+spp_key3_orig <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+View(spp_key3_orig)
+spp_key3 <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+spp_key2 <- spp_key2_orig %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+spp_key2_orig <- rbind(spp_key2_fin_orig, spp_key2_inv_orig) %>%
+filter(!is.na(ComName))
+spp_key2 <- spp_key2_orig %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+# Try 3. FishBase common name page (not English)
+spp_done <- c(spp_key1$species, spp_key2_eng$species)
+spp_missing_from_try12 <- species[!species %in% spp_done]
+spp_key3 <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+# Merge names
+spp_key <- rbind(spp_key1, spp_key2, spp_key3)
+anyDuplicated(spp_key$species)
+View(spp_key)
+spp_key3 <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+View(spp_key3)
+spp_key3 <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName) %>%
+ungroup()
+# Merge names
+spp_key <- rbind(spp_key1, spp_key2, spp_key3)
+View(spp_key)
+spp_key3 <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+# filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName) %>%
+ungroup()
+# Merge names
+spp_key <- rbind(spp_key1, spp_key2, spp_key3)
+# Try 1. FishBase species page
+spp_key1_orig <- freeR::fishbase(dataset="species", species=species, cleaned=T)
+spp_key1 <- spp_key1_orig %>%
+select(species, comm_name) %>%
+filter(!is.na(comm_name))
+# Try 2. FishBase common name page (English names)
+spp_missing_from_try1 <- species[!species %in% spp_key1$species]
+spp_key2_fin_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "fishbase")
+spp_key2_inv_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "sealifebase")
+spp_key2_orig <- rbind(spp_key2_fin_orig, spp_key2_inv_orig) %>%
+filter(!is.na(ComName))
+spp_key2 <- spp_key2_orig %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+spp_missing_from_try1
+species <- preds_wide1$species
+# Try 1. FishBase species page
+spp_key1_orig <- freeR::fishbase(dataset="species", species=species, cleaned=T)
+spp_key1 <- spp_key1_orig %>%
+select(species, comm_name) %>%
+filter(!is.na(comm_name))
+# Try 2. FishBase common name page (English names)
+spp_missing_from_try1 <- species[!species %in% spp_key1$species]
+spp_key2_fin_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "fishbase")
+spp_key2_inv_orig <- rfishbase::sci_to_common(species_list= spp_missing_from_try1, server = "sealifebase")
+spp_key2_orig <- rbind(spp_key2_fin_orig, spp_key2_inv_orig) %>%
+filter(!is.na(ComName))
+spp_key2 <- spp_key2_orig %>%
+filter(Language=="English") %>%
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName)
+# Try 3. FishBase common name page (not English)
+spp_done <- c(spp_key1$species, spp_key2$species)
+spp_missing_from_try12 <- species[!species %in% spp_done]
+spp_key3 <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+# filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName) %>%
+ungroup()
+# Merge names
+spp_key <- rbind(spp_key1, spp_key2, spp_key3)
+spp_key3 <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName) %>%
+ungroup()
+# Merge names
+spp_key <- rbind(spp_key1, spp_key2, spp_key3)
+spp_key3 <- spp_key2_orig %>%
+# Remove species already completed
+filter(Species %in% spp_missing_from_try12) %>%
+# Remove common name with ?s
+filter(!grepl("\\?", ComName)) %>%
+# Remove common names with punctuation
+# filter(!grepl("[:punct:]", ComName)) %>%
+# Take first option
+group_by(Species) %>%
+slice(1) %>%
+# Format columns
+select(Species, ComName) %>%
+rename(species=Species, comm_name=ComName) %>%
+ungroup()
+# Merge names
+spp_key <- rbind(spp_key1, spp_key2, spp_key3)
+View(spp_key)
+# Merge names
+spp_key <- rbind(spp_key1, spp_key2, spp_key3) %>%
+arrange(species)

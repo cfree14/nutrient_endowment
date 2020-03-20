@@ -1,0 +1,12 @@
+name: nutricast
+title:
+username:
+account: sfg-ucsb
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1942457
+bundleId: 2888349
+url: https://emlab-ucsb.shinyapps.io/nutricast/
+when: 1584402564.38897
+asMultiple: FALSE
+asStatic: FALSE

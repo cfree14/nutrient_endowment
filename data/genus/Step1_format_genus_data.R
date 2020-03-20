@@ -20,7 +20,7 @@ outputdir <- "data/genus/processed"
 # GENuS datasets
 # 1. Food composition tables for GENuS
 # 2. Nutrient Totals (incl. Fortification) by Age and Sex (2011)
-# 3. Edible Food by Age and Sex (2011) ----------------------------- working on this one
+# 3. Edible Food by Age and Sex (2011)
 # 4. Nutrient Totals by Age and Sex (2011)
 # 5. Total Nutrient Supplies by Country and Year
 # 6. Nutrient Supplies by Food and Country (2011)
@@ -119,7 +119,7 @@ header_info <-  read.csv(file.path(inputdir, "nutrient_totals_w_fort_by_age_sex"
 col_names <- c("iso3", "country", "blank", header_info$col_name)
 
 # Merge data
-x <- files_merge[1]
+# x <- files_merge[1]
 data_orig <- purrr::map_df(files_merge, function(x) {
   
   # Get sex
@@ -170,7 +170,7 @@ data <- data_orig %>%
                          "Vitaminc"="Vitamin C"),
          nutrient_label=paste0(nutrient, " (", units_short, ")")) %>% 
   # Format age and sex columns
-  mutate(sex=recode(sex, "bothsexes"="both"),
+  mutate(sex=recode(sex, "bothsexes"="Children", "male"="Males", "female"="Females"),
          age_range=factor(age_range, levels=c("0-4", "5-9", "10-14", "15-19",
                                                      "20-24", "25-29", "30-34", "35-39", 
                                                      "40-44", "45-49", "50-54","55-59", 
@@ -225,7 +225,7 @@ header_info <-  read.csv(file.path(inputdir, "edible_food_by_age_sex", files_mer
 col_names <- c("iso3", "country", "blank", header_info$col_name)
 
 # Merge data
-x <- files_merge[1]
+# x <- files_merge[1]
 data_orig <- purrr::map_df(files_merge, function(x) {
   
   # Get sex
@@ -265,7 +265,7 @@ data <- data_orig %>%
   select(iso3:units_short, value_med, value_lo, value_hi) %>% 
   # Format age/sex
   mutate(age_range=gsub("age", "", age_range),
-         sex=recode(sex, "bothsexes"="both"))
+         sex=recode(sex, "bothsexes"="Children", "male"="Males", "female"="Females"))
 
 # Inspect
 str(data)
@@ -311,7 +311,7 @@ header_info <-  read.csv(file.path(inputdir, "nutrient_totals_by_age_sex", files
 col_names <- c("iso3", "country", "blank", header_info$col_name)
 
 # Merge
-x <- files_merge[1]
+# x <- files_merge[1]
 data_orig <- purrr::map_df(files_merge, function(x) {
   
   # Get sex
@@ -355,7 +355,7 @@ data <- data_orig %>%
                          "Vitaminc"="Vitamin C")) %>% 
   mutate(nutrient_label=paste0(nutrient, " (", units_short, ")")) %>% 
   # Format sex and age range
-  mutate(sex=recode(sex, "bothsexes"="both")) %>% 
+  mutate(sex=recode(sex, "bothsexes"="Children", "male"="Males", "female"="Females")) %>% 
   mutate(age_range=factor(age_range, levels=c("0-4", "5-9", "10-14", "15-19",
                                               "20-24", "25-29", "30-34", "35-39", 
                                               "40-44", "45-49", "50-54","55-59", 
@@ -402,7 +402,7 @@ saveRDS(data, file=file.path(outputdir, "genus_nutrient_supplies_by_age_sex_2011
 files_merge <- list.files(file.path(inputdir, "nutrient_sum"), pattern=".csv")
 
 # Merge
-x <- files_merge[1]
+# x <- files_merge[1]
 data_orig <- purrr::map_df(files_merge, function(x) {
   
   # Nutrient name
@@ -498,7 +498,7 @@ saveRDS(data, file=file.path(outputdir, "genus_nutrient_supplies_by_cntry_year.R
 files_merge <- list.files(file.path(inputdir, "nutrients_by_foods"), pattern=".csv")
 
 # Merge
-x <- files_merge[1]
+# x <- files_merge[1]
 data_orig <- purrr::map_df(files_merge, function(x) {
   
   # Get nutrient name
@@ -670,7 +670,7 @@ food_key <-  read.csv(file.path(inputdir, "edible_food_by_year", files_merge[1])
   mutate(food_name_messy=gsub("[[:punct:]]| ", ".", food_name_clean))
   
 # Merge
-x <- files_merge[1]
+# x <- files_merge[1]
 data_orig <- purrr::map_df(files_merge, function(x) {
   colnames <-  colnames(read.csv(file.path(inputdir, "edible_food_by_year", x), as.is=T))
   fdata <- read.csv(file.path(inputdir, "edible_food_by_year", x), as.is=T, skip=2, col.names = colnames, na.strings="*") %>% 
