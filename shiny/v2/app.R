@@ -6,6 +6,10 @@ rm(list = ls())
 ################################################################################
 
 # Packages
+library(rgeos)
+library(sf)
+library(countrycode)
+library(rnaturalearth)
 library(shiny)
 library(shinythemes)
 library(tidyverse)
@@ -54,6 +58,7 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
   tabPanel("Fish nutrition data",
            
            # Text
+           h2("Overview"),
            p("On this page, you can compare the nutrient content of over 7,000 finfish species as estimated by Vaitla et al. (2018). Vaitla et al. (2018) used phylogenetic relatedness and life history traits to predict the protein, total fat, omega-3 fatty acid, omega-6 fatty acid, iron, zinc, vitamin A, vitamin B12, and vitamin D content of ray-finned fishes (Class Actinopterygii). These nine nutrients are critical for human nutrition and generally occur in high concentrations in marine finfish."),
            p("We provide two methods for visualizing and comparing the nutrient content of marine finfish species. The first figure shows the nutrient content of each species as a percentage of the maximum content for any finfish species. These percentages are arrayed in a radar plot for quick comparisons between species. The second figure shows the nutrient content of each species overlayed on histograms illustrating the distribution of nutrient contents for all species."),
            p("To begin, select a single species or a set of many species from the dropdown menu below."),
@@ -73,10 +78,18 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            plotOutput(outputId = "finfishNutrHistPlot", width=1000, height=800),
            br(),
            
+           # References
+           h2("References"),
+           p("Vaitla B, Collar D, Smith MR, Myers SS, Rice BL, Golden CD (2018) Predicting nutrient content of ray-finned fishes using phylogenetic information. Nature Communications 9(3742). https://doi.org/10.1038/s41467-018-06199-w")
+           
            ),
   
   # 3. National nutrition data
   tabPanel("National nutrition data",
+           
+           # Overview
+           h2("Overview"),
+           p("The purpose of this page is to illustrate the current nutritional health of a nation’s population and the relative contribution of marine fisheries to its nutritional health. All of the presented data is from the open-source Global Expanded Nutrient Supply (GENuS) database (Smith et al. 2016). The GENuS database provides nutrient consumptuon estimates for 23 individual nutrients (see below) across 225 food categories for 34 age-sex groups in nearly all countries. Furthermore, it provides historical trends in national nutrition consumption using data from 1961–2011."),
            
            # Select a country
            selectInput("country",
@@ -88,7 +101,10 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            
            # Importance of seafood
            h2("Importance of marine seafood to national nutrition"),
-           p("The figures below show illustrate the importance of marine seafood to national diets and nutrition. The first panel (A) shows median daily per capita marine seafood consumption (grams per person per day) through from 1962 to 2011. The second panel (B) shows the proportion of all daily food consumption represented by this consumption. The third panel (C) shows the proportion of daily per capita nutrient intake coming from marine seafood in 2011 (the most recent year with complete data). Marine seafood is identified as food coming from the following groups: Freshwater sources of seafood (aquatic plants, etc) are not included in this proportion. All of the data presented on this page is from the GENuS database (Smith et al. 2016)."),
+           p("Example text."),
+           plotOutput(outputId = "natl_seafood_impt_map", width=1000, height=400),
+           br(),
+           p("The figure below shows the relative importance of marine seafood to national diets and nutrition. The first panel (A) shows median daily per capita marine seafood consumption from 1961 to 2011 (when data is available). The second panel (B) shows the percentage of daily food consumption coming from marine seafood over the same time period (when data is available). The final panel (C) shows the proportion of daily per capita nutrient intake supplied by marine seafood in 2011 (the most recent year with complete data). In this analysis, marine seafood was defined as coming from the following food groups: marine fish (other), pelagic fish, demersal fish, molluscs (other), crustaceans, fish body oil, and fish liver oil. The following sources of aquatic seafood were excluded from this calculation: freshwater fish, aquatic animals (other), and aquatic plants."),
            plotOutput(outputId = "natl_seafood_impt", width=1000, height=700),
            br(),
            
@@ -97,7 +113,7 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            
            # National nutritional health by age/sex
            h2("National nutritional health by age and sex"),
-           p("Example text."),
+           p("The figure below illustrates national nutritional intake by age and sex relative to the levels recommended by the U.S. Dietary Guidelines (USDHHS 2015). Red shading indicates groups with median consumption below the recommended amounts and blue shading indicates groups with median consumption above the recommended amounts."),
            br(),
            
            # Macronutrients
@@ -108,7 +124,7 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            
            # Calories
            h3("Calories"),
-           p("Example text."),
+           p("Calories are a unit of energy widely used in nutrition. They are measured in kilocalorie (kcal) which represents the amount of heat required to raise the temperature of 1 kilogram of water by 1°C. Fat in food contains 9 kilocalories per gram (kcal/g) while carbohydrates and proteins in food contain 4 kcal/g. Alcohol in food contains 7 kcal/g."),
            plotOutput(outputId = "natl_nutr_stats_calories", width=1000, height=400),
            br(),
            
@@ -254,7 +270,15 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            h3("Vitamin C"),
            p("Vitamin C (ascorbic acid) is a water soluble vitamin that is an antioxidant, part of an enzyme needed for protein metabolism, important for immune system health, and aids in iron absorption. Vitamin C is found only in fruits and vegetables, especially citrus fruits, vegetables in the cabbage family, cantaloupe, strawberries, peppers, tomatoes, potatoes, lettuce, papayas, mangoes, and kiwifruit."),
            plotOutput(outputId = "natl_nutr_stats_vitC", width=1000, height=400),
-           br()
+           br(),
+           
+           # References
+           ############################################
+           
+           # References
+           h2("References"),
+           p("Vaitla B, Collar D, Smith MR, Myers SS, Rice BL, Golden CD (2018) Predicting nutrient content of ray-finned fishes using phylogenetic information. Nature Communications 9(3742). https://doi.org/10.1038/s41467-018-06199-w"), 
+           p("U.S. Department of Health and Human Services and U.S. Department of Agriculture. 2015–2020 Dietary Guidelines for Americans. 8th Edition. December 2015. Available at http://health.gov/dietaryguidelines/2015/guidelines/")
            
            ),
   
@@ -291,9 +315,19 @@ server <- function(input, output){
   # National seafood importance
   ######################################################################
   
+  # National seafood importance map
+  output$natl_seafood_impt_map <- renderPlot({
+    g <- plot_natl_seafood_impt_map(pdiet_seafood_cntry_yr, 
+                                pnutrient_seafood_cntry_2011, 
+                                cntry=input$country)
+    g
+  })
+  
   # National seafood importance
   output$natl_seafood_impt <- renderPlot({
-    g <- plot_natl_seafood_impt(pdiet_seafood_cntry_yr, pnutrient_seafood_cntry_2011, cntry=input$country)
+    g <- plot_natl_seafood_impt(pdiet_seafood_cntry_yr, 
+                                pnutrient_seafood_cntry_2011, 
+                                cntry=input$country)
     g
   })
   
