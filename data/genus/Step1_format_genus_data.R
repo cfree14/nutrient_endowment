@@ -9,6 +9,7 @@ rm(list = ls())
 # Packages
 library(ggplot2)
 library(tidyverse)
+library(countrycode)
 
 # Directories
 inputdir <- "data/genus/raw"
@@ -165,7 +166,7 @@ header_info <-  read.csv(file.path(inputdir, "nutrient_totals_w_fort_by_age_sex"
          col_name=paste(nutrient, stat, sep="_"))
 
 # Column names
-col_names <- c("iso3", "country", "blank", header_info$col_name)
+col_names <- c("iso3_orig", "country_orig", "blank", header_info$col_name)
 
 # Merge data
 # x <- files_merge[1]
@@ -197,16 +198,22 @@ data <- data_orig %>%
   # Add nutrient, stat, and units column
   left_join(header_info, by=c("key"="col_name")) %>% 
   rename(units_long=units) %>% 
-  mutate(units_short=gsub("/person/day", "", units_long)) %>% 
+  mutate(units_short=gsub("/person/day", "", units_long)) %>%
+  # Standardize ISO3s and country names
+  mutate(iso3_use=countrycode(country_orig, "country.name", "iso3c"),
+         country_use=countrycode(iso3_use, "iso3c", "country.name"),
+         iso3_use=ifelse(!is.na(iso3_use), iso3_use, iso3_orig),
+         country_use=ifelse(!is.na(country_use), country_use, country_orig)) %>% 
   # Rearrange
   select(-key) %>% 
-  select(iso3, country, age_range, sex, nutrient, 
+  select(iso3_use, country_use, iso3_orig, country_orig,
+         age_range, sex, nutrient, 
          units_long, units_short, stat, value, everything()) %>% 
   spread(key="stat", value="value") %>% 
   rename(value_med=md, value_lo=lo, value_hi=hi) %>% 
-  select(iso3, country, age_range, sex, nutrient, 
+  select(iso3_use, country_use, iso3_orig, country_orig, age_range, sex, nutrient, 
          units_long, units_short, value_med, value_lo, value_hi, everything()) %>% 
-  arrange(iso3, nutrient, age_range) %>% 
+  arrange(iso3_use, nutrient, age_range) %>% 
   # Format nutrient column
   mutate(nutrient=str_to_title(nutrient)) %>% 
   mutate(nutrient=recode(nutrient, 
@@ -227,7 +234,7 @@ data <- data_orig %>%
                                                      "40-44", "45-49", "50-54","55-59", 
                                                      "60-64", "65-69", "70-74", "75-79", "80+"))) %>% 
   # Arrange
-  select(iso3:sex, nutrient_type, nutrient_label, everything())
+  select(iso3_use:sex, nutrient_type, nutrient_label, everything())
 
 # Inspect data
 str(data)
@@ -235,7 +242,7 @@ sort(unique(data$nutrient))
 freeR::complete(data)
 
 # Example plot
-g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+g <- ggplot(data %>% filter(country_use=="Ghana"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
   facet_wrap(~nutrient_label, ncol=4, scale="free_y") +
   geom_bar(stat="identity", position="dodge") +
   theme_bw() +
@@ -274,7 +281,7 @@ header_info <-  read.csv(file.path(inputdir, "edible_food_by_age_sex", files_mer
   mutate(stat=recode(stat, "High 95% UI"="hi", "Low 95% UI"="lo", "Median"="md"),
          food_name_messy=gsub("[[:punct:]]| ", ".", food_name_clean),
          col_name=paste(food_name_messy, stat, sep="_"))
-col_names <- c("iso3", "country", "blank", header_info$col_name)
+col_names <- c("iso3_orig", "country_orig", "blank", header_info$col_name)
 
 # Merge data
 # x <- files_merge[1]
@@ -293,7 +300,7 @@ data_orig <- purrr::map_df(files_merge, function(x) {
                     as.is=T, skip=3, na.strings="*", col.names=col_names) %>% 
     mutate(age_range=age_range, 
            sex=sex) %>% 
-    select(iso3, country, age_range, sex, everything())
+    select(iso3_orig, country_orig, age_range, sex, everything())
   
 })
 
@@ -304,17 +311,24 @@ data <- data_orig %>%
   # Convert wide-to-long
   gather(key="key", value="value", 5:ncol(.)) %>% 
   # Arrange
-  arrange(iso3, age_range) %>% 
+  arrange(iso3_orig, age_range) %>% 
   # Add food, units, stat 
   left_join(header_info, c("key"="col_name")) %>% 
   rename(food=food_name_clean, units_long=units) %>% 
   select(-c(key, food_name_messy)) %>% 
   mutate(units_short=gsub("/person/day", "", units_long)) %>%  
-  select(iso3, country, age_range, sex, food, units_long, units_short, stat, value, everything()) %>% 
+  # Standardize ISO3s and country names
+  mutate(iso3_use=countrycode(country_orig, "country.name", "iso3c"),
+         country_use=countrycode(iso3_use, "iso3c", "country.name"),
+         iso3_use=ifelse(!is.na(iso3_use), iso3_use, iso3_orig),
+         country_use=ifelse(!is.na(country_use), country_use, country_orig)) %>% 
+  # Arrange
+  select(iso3_use, country_use, iso3_orig, country_orig, 
+         age_range, sex, food, units_long, units_short, stat, value, everything()) %>% 
   # Reshape
   spread(key="stat", value="value") %>% 
   rename(value_med=md, value_lo=lo, value_hi=hi) %>% 
-  select(iso3:units_short, value_med, value_lo, value_hi) %>% 
+  select(iso3_use:units_short, value_med, value_lo, value_hi) %>% 
   # Format age/sex
   mutate(age_range=gsub("age", "", age_range),
          sex=recode(sex, "bothsexes"="Children", "male"="Males", "female"="Females"))
@@ -360,7 +374,7 @@ header_info <-  read.csv(file.path(inputdir, "nutrient_totals_by_age_sex", files
          col_name=paste(nutrient, stat, sep="_"))
 
 # Column names
-col_names <- c("iso3", "country", "blank", header_info$col_name)
+col_names <- c("iso3_orig", "country_orig", "blank", header_info$col_name)
 
 # Merge
 # x <- files_merge[1]
@@ -386,10 +400,17 @@ data_orig <- purrr::map_df(files_merge, function(x) {
 data <- data_orig %>%
   # Rearrange columns
   select(-blank) %>% 
-  select(iso3, country, age_range, sex, everything()) %>% 
-  arrange(iso3, age_range) %>% 
+  select(iso3_orig, country_orig, age_range, sex, everything()) %>% 
+  arrange(iso3_orig, age_range) %>%
+  # Standardize ISO3s and country names
+  mutate(iso3_use=countrycode(country_orig, "country.name", "iso3c"),
+         country_use=countrycode(iso3_use, "iso3c", "country.name"),
+         iso3_use=ifelse(!is.na(iso3_use), iso3_use, iso3_orig),
+         country_use=ifelse(!is.na(country_use), country_use, country_orig)) %>% 
+  # Arrange
+  select(iso3_use, country_use, everything()) %>% 
   # Convert wide-to-long
-  gather(key="key", value="value", 5:ncol(.)) %>% 
+  gather(key="key", value="value", 7:ncol(.)) %>% 
   # Add nutrient and stat
   left_join(header_info, by=c("key"="col_name")) %>% 
   # Format units
@@ -416,12 +437,12 @@ data <- data_orig %>%
                                               "60-64", "65-69", "70-74", "75-79", "80+"))) %>% 
   # Arrange columns
   select(-key) %>% 
-  select(iso3, country, age_range, sex, nutrient_type, nutrient_label, 
+  select(iso3_use, country_use, iso3_orig, country_orig, age_range, sex, nutrient_type, nutrient_label, 
          nutrient, units_long, units_short, stat, value, everything()) %>% 
   # Spread stats
   spread(key="stat", value="value") %>% 
   rename(value_med=md, value_lo=lo, value_hi=hi) %>% 
-  select(iso3:units_short, value_med, value_lo, value_hi, everything())
+  select(iso3_use:units_short, value_med, value_lo, value_hi, everything())
 
 # Inspect
 str(data)
@@ -429,7 +450,7 @@ sort(unique(data$nutrient))
 freeR::complete(data)
 
 # Example plot
-g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
+g <- ggplot(data %>% filter(country_use=="Ghana"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
   facet_wrap(~nutrient_label, ncol=4, scale="free_y") +
   geom_bar(stat="identity", position="dodge") +
   theme_bw() +
@@ -472,7 +493,7 @@ data_orig <- purrr::map_df(files_merge, function(x) {
     arrange(year, stat) %>% 
     mutate(year_col=paste(year, stat, sep="_")) %>% 
     pull(year_col)
-  col_names <- c("iso3", "country", "blank", year_cols)
+  col_names <- c("iso3_orig", "country_orig", "blank", year_cols)
   length(col_names)
   
   # Read data
@@ -483,8 +504,8 @@ data_orig <- purrr::map_df(files_merge, function(x) {
            stat=substr(key, 7, 9), 
            nutrient=nutrient,
            units=units) %>% 
-    select(iso3, country, nutrient, units, year, stat, value) %>% 
-    arrange(iso3, year)
+    select(iso3_orig, country_orig, nutrient, units, year, stat, value) %>% 
+    arrange(iso3_orig, year)
   
   
 })
@@ -511,12 +532,17 @@ data <- data_orig %>%
   mutate(units_short=gsub("/person/day", "", units_long)) %>% 
   # Add label 
   mutate(nutrient_label=paste0(nutrient, " (", units_short, ")")) %>% 
+  # Standardize ISO3s and country names
+  mutate(iso3_use=countrycode(country_orig, "country.name", "iso3c"),
+         country_use=countrycode(iso3_use, "iso3c", "country.name"),
+         iso3_use=ifelse(!is.na(iso3_use), iso3_use, iso3_orig),
+         country_use=ifelse(!is.na(country_use), country_use, country_orig)) %>% 
   # Rearrange
-  select(iso3, country, nutrient_type, nutrient_label, nutrient, units_long, units_short, year, everything()) %>% 
+  select(iso3_use, country_use, iso3_orig, country_orig, nutrient_type, nutrient_label, nutrient, units_long, units_short, year, everything()) %>% 
   # Reshape
   spread(key="stat", value="value") %>% 
   rename(value_med=md, value_lo=lo, value_hi=hi) %>% 
-  select(iso3, country, nutrient_type, nutrient_label, nutrient, units_long, units_short, year, value_med, value_lo, value_hi, everything())
+  select(iso3_use, country_use, iso3_orig, country_orig, nutrient_type, nutrient_label, nutrient, units_long, units_short, year, value_med, value_lo, value_hi, everything())
 
 # Inspect nutrients
 sort(unique(data$nutrient))
@@ -524,7 +550,7 @@ freeR::complete(data)
 
 # Example plot
 cntry <- "Ghana"
-g <- ggplot(data %>% filter(country==cntry), aes(x=year, y=value_med)) +
+g <- ggplot(data %>% filter(country_use==cntry), aes(x=year, y=value_med)) +
   geom_line() +
   geom_ribbon(aes(ymin=value_lo, ymax=value_hi), alpha=0.2) +
   facet_wrap(~nutrient_label, ncol=4, scale="free_y") +
@@ -571,7 +597,7 @@ data_orig <- purrr::map_df(files_merge, function(x) {
     select(4:ncol(.)) %>% t() %>% 
     as.data.frame() %>% 
     mutate(col_name=paste(V1, V2, sep="-"))
-  col_names <- c("iso3", "country", "blank", header_info$col_name)
+  col_names <- c("iso3_orig", "country_orig", "blank", header_info$col_name)
   
   # Read data
   fdata <- read.csv(file.path(inputdir, "nutrients_by_foods", x), as.is=T, skip=3, na.strings="*", col.names = col_names) %>% 
@@ -584,7 +610,7 @@ data_orig <- purrr::map_df(files_merge, function(x) {
     # Convert wide to long
     gather(key="food", value="value", 6:ncol(.)) %>% 
     # Arrange
-    arrange(iso3, food)
+    arrange(iso3_orig, food)
   
 })
 
@@ -622,10 +648,15 @@ data <- data_orig %>%
   rename(value_med=median, value_lo=low, value_hi=high) %>% 
   # Add clean food name
   left_join(food_key, by="food_name_messy") %>% 
+  # Standardize ISO3s and country names
+  mutate(iso3_use=countrycode(country_orig, "country.name", "iso3c"),
+         country_use=countrycode(iso3_use, "iso3c", "country.name"),
+         iso3_use=ifelse(!is.na(iso3_use), iso3_use, iso3_orig),
+         country_use=ifelse(!is.na(country_use), country_use, country_orig)) %>% 
   # Rearrange columns
   select(-c(file, food_name_messy)) %>%
   rename(food=food_name_clean) %>% 
-  select(iso3, country, nutrient_type, nutrient, units_long, units_short, 
+  select(iso3_use, country_use, iso3_orig, country_orig, nutrient_type, nutrient, units_long, units_short, 
          food, value_med, value_lo, value_hi, everything())
 
 # Inspect
@@ -663,7 +694,7 @@ header_info <- read.csv(file.path(inputdir, "NutrientsFortification_2011.csv"),
   rename(nutrient=V1, stat=V2, units=V3) %>% 
   mutate(stat=recode(stat, "High 95% UI"="hi", "Low 95% UI"="lo", "Median"="md"),
          col_name=paste(nutrient, stat, sep="_"))
-col_names <- c("iso3", "country", "blank", header_info$col_name)
+col_names <- c("iso3_orig", "country_orig", "blank", header_info$col_name)
 
 # Read data
 data_orig <- read.csv(file.path(inputdir, "NutrientsFortification_2011.csv"), as.is=T, na.strings="*", skip=3, col.names = col_names)
@@ -678,8 +709,13 @@ data <- data_orig %>%
   mutate(nutrient=gsub("_md|_lo|_hi", "", key),
          stat=ifelse(grepl("_md", key), "median", 
                      ifelse(grepl("_hi", key), "high", "low"))) %>% 
+  # Standardize ISO3s and country names
+  mutate(iso3_use=countrycode(country_orig, "country.name", "iso3c"),
+         country_use=countrycode(iso3_use, "iso3c", "country.name"),
+         iso3_use=ifelse(!is.na(iso3_use), iso3_use, iso3_orig),
+         country_use=ifelse(!is.na(country_use), country_use, country_orig)) %>% 
   # Arrange
-  select(iso3, country, nutrient, stat, value) %>% 
+  select(iso3_use, country_use, iso3_orig, country_orig, nutrient, stat, value) %>% 
   spread(key="stat", value="value") %>% 
   rename(value_med=median, value_lo=low, value_hi=high) %>% 
   # Format nutrients and add units
@@ -699,7 +735,7 @@ data <- data_orig %>%
   rename(units_long=units) %>% 
   mutate(units_short=gsub("/person/day", "", units_long)) %>% 
   # Arrange
-  select(iso3, country, nutrient_type, nutrient, units_long, units_short, everything())
+  select(iso3_use, country_use, iso3_orig, country_orig, nutrient_type, nutrient, units_long, units_short, everything())
 
 # Inspect
 str(data)
@@ -748,20 +784,25 @@ data <- data_orig %>%
   mutate(year=file %>% gsub("edible_food_", "", .) %>% gsub(".csv", "", . ) %>% as.numeric()) %>% 
   select(file, year, everything()) %>% 
   # Rename country columns
-  rename(iso3=X, country=X.1) %>% 
+  rename(iso3_orig=X, country_orig=X.1) %>% 
   # Remove file column and blank column
   select(-c(file, FOOD)) %>% 
+  # Standardize ISO3s and country names
+  mutate(iso3_use=countrycode(country_orig, "country.name", "iso3c"),
+         country_use=countrycode(iso3_use, "iso3c", "country.name"),
+         iso3_use=ifelse(!is.na(iso3_use), iso3_use, iso3_orig),
+         country_use=ifelse(!is.na(country_use), country_use, country_orig)) %>% 
   # Rearrange and convert wide-to-long
-  select(iso3, country, year, everything()) %>% 
-  gather(key="food", value="value", 4:ncol(.)) %>% 
+  select(iso3_use, country_use, iso3_orig, country_orig, year, everything()) %>% 
+  gather(key="food", value="value", 6:ncol(.)) %>% 
   # Format food name
   rename(food_name_messy=food) %>% 
   left_join(food_key, by="food_name_messy") %>% 
   rename(food=food_name_clean) %>% 
   select(-food_name_messy) %>% 
   # Arrange
-  select(iso3, country, year, food, value) %>% 
-  arrange(iso3, food, year) %>% 
+  select(iso3_use, country_use, iso3_orig, country_orig, year, food, value) %>% 
+  arrange(iso3_use, food, year) %>% 
   rename(g_person_day=value)
   
 # Inspect
