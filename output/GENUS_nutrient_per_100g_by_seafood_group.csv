@@ -1,0 +1,7 @@
+"genus_food_name","calcium_mg","calories_kcal","carbohydrates_g","copper_mg","dietary_fiber_g","fat_g","folate_mcg","iron_mg","magnesium_mg","monounsaturated_fatty_acids_g","niacin_mg","phosphorus_mg","polyunsaturated_fatty_acids_g","potassium_mg","protein_g","riboflavin_mg","saturated_fatty_acids_g","sodium_mg","thiamin_mg","vitamin_a_mcg_rae","vitamin_b6_mg","vitamin_c_mg","zinc_mg"
+"Cephalopods",35.5,76.75,0.6,0.511,0,0.8,16,1.75,30,0.1,1.5,163,0.3,260,15.49,0.06,0.3,230,0.02,28.5,0.15,2.75,1.68
+"Crustaceans",83,88,0.8,0.669,0,1.14,40.5,1.6,39,0.21,2.45,224,0.3,220,17.5,0.07,0.211,190,0.04,44,0.15,0,2.39
+"Demersal Fish",39,93,0,0.031,0,1.35,9,0.75,29,0.279,2.7,200,0.374,300,18.84,0.08,0.2715,79,0.05,19.5,0.287,0,0.51
+"Marine Fish; Other",49,99,0,0.0375,0,1.9,8,1,30,0.471,2.8,216,0.464,301.5,18.99,0.08,0.44,79,0.0485,24,0.3,0,0.59
+"Molluscs; Other",89.5,81.5,3.535,0.205,0,1.1,7,5.2,22,0.2165,1.68,162,0.409,175,12.06,0.145,0.3275,275.05,0.026,26.5,0.05,4,2.36
+"Pelagic Fish",57.5,109,0,0.0575,0,3,8,1.225,32,1.182,4.1,221,1.06,331,19.4,0.11,1.18,80,0.06,27,0.4,0,0.66

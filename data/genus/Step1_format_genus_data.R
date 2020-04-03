@@ -13,6 +13,7 @@ library(tidyverse)
 # Directories
 inputdir <- "data/genus/raw"
 outputdir <- "data/genus/processed"
+tabledir <- "tables"
 
 # The GENuS Dataverse:
 # https://dataverse.harvard.edu/dataverse/GENuS
@@ -26,6 +27,10 @@ outputdir <- "data/genus/processed"
 # 6. Nutrient Supplies by Food and Country (2011)
 # 7. Total Nutrient Supply including Fortification (2011)
 # 8. Edible Food by Country and Year
+
+# Read nutrient key
+nutrient_key <- rio::import(file.path(tabledir, "genus_nutrient_key.xlsx")) %>% 
+  setNames(c("nutrient_type", "nutrient_subtype", "nutrient", "nutrient_full", "diet_req_yn"))
 
 
 ################################################################################
@@ -73,11 +78,55 @@ data <- data_orig %>%
                        "FCT_GENuS_US_v2.csv"="United States",
                        "FCT_GENuS_WestAfrica_v2.csv"="Africa (West)")) %>% 
   # Arrange columns
-  select(file, region, everything())
+  select(file, region, everything()) %>% 
+  # Convert wide-to-long
+  gather(key="nutrient", value="units_per_100g", 6:ncol(.)) %>% 
+  # Format nutrient name
+  mutate(nutrient=str_to_title(nutrient),
+         nutrient=recode(nutrient, 
+                         "B12_usda_only"="Vitamin B12 (USDA only)",
+                         "B6"="Vitamin B6",
+                         "Dietary_fiber"="Dietary fiber",
+                         "Monounsaturated_fa"="Monounsaturated fatty acids",
+                         "Omega_3_usda_only"="Omega-3 fatty acids (USDA only)",
+                         "Polyunsaturated_fa"="Polyunsaturated fatty acids",
+                         "Saturated_fa"="Saturated fatty acids",
+                         "Vitamin_a"="Vitamin A",
+                         "Vitamin_c"="Vitamin C",
+                         "Water_moisture"="Water moisture")) %>% 
+  # Add nutrient units
+  mutate(units=recode(nutrient,
+                      "Calories"="kcal",
+                      "Protein"="g",
+                      "Fat"="g",
+                      "Carbohydrates"="g",
+                      "Vitamin C"="mg",
+                      "Vitamin A"="mcg RAE",
+                      "Folate"="mcg",
+                      "Calcium"="mg",
+                      "Iron"="mg",
+                      "Zinc"="mg",
+                      "Potassium"="mg",
+                      "Dietary fiber"="g",
+                      "Copper"="mg",
+                      "Sodium"="mg",
+                      "Phosphorus"="mg",
+                      "Thiamin"="mg",
+                      "Riboflavin"="mg",
+                      "Niacin"="mg",
+                      "Vitamin B6"="mg",
+                      "Magnesium"="mg",
+                      "Saturated fatty acids"="g",
+                      "Monounsaturated fatty acids"="g",
+                      "Polyunsaturated fatty acids"="g")) %>% 
+  # Arrange
+  select(file:nutrient, units, units_per_100g, everything())
 
 # Inspect data
 str(data)
-  
+sort(unique(data$nutrient))
+data %>% select(nutrient, units) %>%  unique()
+
 # Export data
 saveRDS(data, file=file.path(outputdir, "genus_food_composition_tables.Rds"))
 
@@ -169,6 +218,8 @@ data <- data_orig %>%
                          "Vitamina"="Vitamin A",
                          "Vitaminc"="Vitamin C"),
          nutrient_label=paste0(nutrient, " (", units_short, ")")) %>% 
+  # Add nutrient type
+  left_join(nutrient_key %>% select(nutrient, nutrient_type), by="nutrient") %>% 
   # Format age and sex columns
   mutate(sex=recode(sex, "bothsexes"="Children", "male"="Males", "female"="Females"),
          age_range=factor(age_range, levels=c("0-4", "5-9", "10-14", "15-19",
@@ -176,11 +227,12 @@ data <- data_orig %>%
                                                      "40-44", "45-49", "50-54","55-59", 
                                                      "60-64", "65-69", "70-74", "75-79", "80+"))) %>% 
   # Arrange
-  select(iso3:sex, nutrient_label, everything())
+  select(iso3:sex, nutrient_type, nutrient_label, everything())
 
 # Inspect data
 str(data)
 sort(unique(data$nutrient))
+freeR::complete(data)
 
 # Example plot
 g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
@@ -354,6 +406,8 @@ data <- data_orig %>%
                          "Vitamina"="Vitamin A",
                          "Vitaminc"="Vitamin C")) %>% 
   mutate(nutrient_label=paste0(nutrient, " (", units_short, ")")) %>% 
+  # Add nutrient type
+  left_join(nutrient_key %>% select(nutrient, nutrient_type), by="nutrient") %>% 
   # Format sex and age range
   mutate(sex=recode(sex, "bothsexes"="Children", "male"="Males", "female"="Females")) %>% 
   mutate(age_range=factor(age_range, levels=c("0-4", "5-9", "10-14", "15-19",
@@ -362,7 +416,7 @@ data <- data_orig %>%
                                               "60-64", "65-69", "70-74", "75-79", "80+"))) %>% 
   # Arrange columns
   select(-key) %>% 
-  select(iso3, country, age_range, sex, nutrient_label, 
+  select(iso3, country, age_range, sex, nutrient_type, nutrient_label, 
          nutrient, units_long, units_short, stat, value, everything()) %>% 
   # Spread stats
   spread(key="stat", value="value") %>% 
@@ -372,6 +426,7 @@ data <- data_orig %>%
 # Inspect
 str(data)
 sort(unique(data$nutrient))
+freeR::complete(data)
 
 # Example plot
 g <- ggplot(data %>% filter(country=="Ghana"), aes(x=age_range, y=value_med, fill=sex, group=sex)) +
@@ -449,20 +504,23 @@ data <- data_orig %>%
                          "Saturatedfa"="Saturated fatty acids",
                          "Vitamina"="Vitamin A",
                          "Vitaminc"="Vitamin C")) %>% 
+  # Add nutrient type
+  left_join(nutrient_key %>% select(nutrient, nutrient_type), by="nutrient") %>% 
   # Format units
   rename(units_long=units) %>% 
   mutate(units_short=gsub("/person/day", "", units_long)) %>% 
   # Add label 
   mutate(nutrient_label=paste0(nutrient, " (", units_short, ")")) %>% 
   # Rearrange
-  select(iso3, country, nutrient_label, nutrient, units_long, units_short, year, everything()) %>% 
+  select(iso3, country, nutrient_type, nutrient_label, nutrient, units_long, units_short, year, everything()) %>% 
   # Reshape
   spread(key="stat", value="value") %>% 
   rename(value_med=md, value_lo=lo, value_hi=hi) %>% 
-  select(iso3, country, nutrient_label, nutrient, units_long, units_short, year, value_med, value_lo, value_hi, everything())
+  select(iso3, country, nutrient_type, nutrient_label, nutrient, units_long, units_short, year, value_med, value_lo, value_hi, everything())
 
 # Inspect nutrients
 sort(unique(data$nutrient))
+freeR::complete(data)
 
 # Example plot
 cntry <- "Ghana"
@@ -555,6 +613,8 @@ data <- data_orig %>%
                          "Saturatedfa"="Saturated fatty acids",
                          "Vitamina"="Vitamin A",
                          "Vitaminc"="Vitamin C")) %>% 
+  # Add nutrient type
+  left_join(nutrient_key %>% select(nutrient, nutrient_type), by="nutrient") %>% 
   # Add short units
   mutate(units_short=gsub("/person/day", "", units_long)) %>% 
   # Reshape values
@@ -565,11 +625,13 @@ data <- data_orig %>%
   # Rearrange columns
   select(-c(file, food_name_messy)) %>%
   rename(food=food_name_clean) %>% 
-  select(iso3, country, nutrient, units_long, units_short, food, value_med, value_lo, value_hi, everything())
+  select(iso3, country, nutrient_type, nutrient, units_long, units_short, 
+         food, value_med, value_lo, value_hi, everything())
 
 # Inspect
 sort(unique(data$nutrient))
 sort(unique(data$food))
+freeR::complete(data)
 
 # Export
 saveRDS(data, file=file.path(outputdir, "genus_nutrient_supplies_by_cntry_food_2011.Rds"))
@@ -631,11 +693,13 @@ data <- data_orig %>%
                          "Saturatedfa"="Saturated fatty acids",
                          "Vitamina"="Vitamin A",
                          "Vitaminc"="Vitamin C")) %>% 
+  # Add nutrient type
+  left_join(nutrient_key %>% select(nutrient, nutrient_type), by="nutrient") %>% 
   # Format units
   rename(units_long=units) %>% 
   mutate(units_short=gsub("/person/day", "", units_long)) %>% 
   # Arrange
-  select(iso3, country, nutrient, units_long, units_short, everything())
+  select(iso3, country, nutrient_type, nutrient, units_long, units_short, everything())
 
 # Inspect
 str(data)

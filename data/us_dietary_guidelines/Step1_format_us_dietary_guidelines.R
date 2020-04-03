@@ -46,7 +46,7 @@ header_info <- expand.grid(sex=c("female", "male"),
   mutate(col_name=paste(sex, age_range, sep="_"))
 
 # Column names
-col_names <- c("type", "nutrient", "source", "child", header_info$col_name)
+col_names <- c("type", "nutrient", "guideline_type_abbrev", "child", header_info$col_name)
 
 # Format data
 data1 <- data_orig %>% 
@@ -66,8 +66,15 @@ data1 <- data_orig %>%
   mutate(nutrient=gsub("^(.*?),.*", "\\1", nutrient_label) %>% str_trim(),
          units=gsub(".*\\,", "", nutrient_label) %>% str_trim(),
          nutrient_label=paste0(nutrient, " (", units, ")")) %>% 
+  # Add guideline type
+  mutate(guideline_type=recode(guideline_type_abbrev, 
+                               "RDA" = "Recommended Dietary Allowance",
+                               "AI" = "Adequate Intake",
+                               "UL" = "Tolerable Upper Intake Level",
+                               "AMDR" = "Acceptable Macronutrient Distribution Range",
+                               "DGA" = "2015-2020 Dietary Guidelines recommended limit")) %>% 
   # Rearrange
-  select(type, nutrient_label, nutrient, units, source, sex, age_range, value_type, value) %>% 
+  select(type, nutrient_label, nutrient, units, guideline_type_abbrev, guideline_type, sex, age_range, value_type, value) %>% 
   # Format values
   mutate(value=recode(value, 
                       "600c"="600",
