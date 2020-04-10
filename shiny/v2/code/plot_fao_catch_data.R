@@ -1,15 +1,22 @@
 
 # Plot FAO historical catch data
-# cntry <- "Ghana"
+# cntry <- "Albania"
 plot_fao_catch_data <- function(fao, cntry, my_theme=my_theme1){
   
   # Subset data
   sdata <- fao %>% 
-    filter(country_use==cntry) #%>% 
-  # Spread then gather (makes plotting easier)
-  # This ensures that every year has a value (0 if not present before)
-  # spread(key="prod_type", value="prod_mt", fill=0) %>%
-  # gather(key="prod_type", value="prod_mt", 7:ncol(.))
+    # Subset
+    filter(country_use==cntry) %>% 
+    # Spread and gather to add missing years
+    spread(key="year", value="prod_mt") %>% 
+    gather(key="year", value="prod_mt", 7:ncol(.)) %>% 
+    mutate(prod_mt=ifelse(!is.na(prod_mt), prod_mt, 0)) %>% 
+    # Rename production type
+    mutate(prod_type=recode_factor(prod_type, 
+                                   "Landings"="Total landings", 
+                                   "Edible meat"="Edible meat"),
+           year=as.numeric(year)) %>% 
+    ungroup()
   
   # Plot data
   g <- ggplot(sdata, aes(x=year, y=prod_mt/1e3, fill=isscaap)) +

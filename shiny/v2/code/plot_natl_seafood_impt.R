@@ -1,6 +1,6 @@
 
 # Plot national importance of seafood
-# cntry <- "Ghana"
+# cntry <- "Albania"
 plot_natl_seafood_impt <- function(pdiet_seafood_cntry_yr, pnutrient_seafood_cntry_2011, cntry, my_theme=my_theme1){
   
   # p(diet from seafood)
@@ -8,7 +8,8 @@ plot_natl_seafood_impt <- function(pdiet_seafood_cntry_yr, pnutrient_seafood_cnt
   
   # Data
   pdiet <- pdiet_seafood_cntry_yr %>% 
-    filter(country==cntry)
+    filter(country==cntry) %>% 
+    mutate(seafood_g_person_day=ifelse(total_g_person_day==0, NA, seafood_g_person_day))
   
   # Plot % of diet from seafood over time
   g1 <- ggplot(pdiet, aes(x=year, y=seafood_g_person_day)) +
