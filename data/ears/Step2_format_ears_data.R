@@ -20,11 +20,11 @@ data4_orig <- readxl::read_excel(file.path(indir, "DRI_summary_tables.xlsx"), sh
 data5_orig <- readxl::read_excel(file.path(indir, "DRI_summary_tables.xlsx"), sheet=5)
 data6_orig <- readxl::read_excel(file.path(indir, "DRI_summary_tables.xlsx"), sheet=6)
 
-# Format data
+# Format EAR data
 ################################################################################
 
 # Format data
-data1 <- data1_orig %>% 
+ears <- data1_orig %>% 
   # Remove column
   select(-pages) %>% 
   # Convert wide to long
@@ -77,10 +77,12 @@ data1 <- data1_orig %>%
   # Factor ages
   mutate(age_range=factor(age_range, levels=c("7-12 mo",  "1-3 yr", "4-8 yr", 
                                               "9-13 yr" , "14-18 yr", "19-30 yr", 
-                                              "31-50 yr", "51-70 yr", ">70 yr")))
+                                              "31-50 yr", "51-70 yr", ">70 yr"))) %>% 
+  # Factor sexes
+  mutate(sex=factor(sex, levels=c("Infants", "Children", "Males", "Females", "Pregnancy", "Lactation")))
 
 # Plot data
-g <- ggplot(data1, aes(x=age_range, y=ear, fill=sex)) +
+g <- ggplot(ears, aes(x=age_range, y=ear, fill=sex)) +
   facet_wrap(~nutrient_label, ncol=4, scale="free_y") +
   geom_bar(stat="identity", position="dodge") +
   labs(x="Age range", y="Estimated average requirement (EAR)") +
@@ -91,6 +93,41 @@ g <- ggplot(data1, aes(x=age_range, y=ear, fill=sex)) +
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black"))
 g
+
+
+
+# Format UL data
+################################################################################
+
+# Format data
+uls <- data5_orig %>% 
+  # Merge vitamin/element data
+  left_join(data6_orig) %>% 
+  # Convert wide to long
+  gather(key="nutrient_orig", value="ul_orig", 3:ncol(.)) %>% 
+  # Format nutrients
+  mutate(nutrient=gsub("_g|_mg|_ug", "", nutrient_orig) %>% gsub("_", " ", .) %>% str_to_title(),
+         nutrient=recode(nutrient, "Pantothenic Acid"="Pantothenic acid")) %>% 
+  # Format units
+  mutate(units=ifelse(grepl("_ug", nutrient_orig), "μg",
+                      ifelse(grepl("_mg", nutrient_orig), "mg",
+                             ifelse(grepl("_g", nutrient_orig), "g", NA)))) %>% 
+  # Format UL values
+  mutate(ul=ifelse(ul_orig %in% c("ND", "NDe"), NA, ul_orig),
+         ul=as.numeric(ul)) %>% 
+  # Build nutrient label
+  mutate(nutrient_label=paste0(nutrient, " (", units, ")")) %>% 
+  # Arrange
+  select(-c(nutrient_orig, ul_orig)) %>% 
+  select(nutrient_label, nutrient, units, sex, age_range, ul, everything())
+
+
+
+str(uls)
+
+
+
+
 
 
 
