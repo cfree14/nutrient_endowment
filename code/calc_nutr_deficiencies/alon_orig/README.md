@@ -1,0 +1,9 @@
+# Nutrient-Deficiencies-calculations
+What is this repositroy about?
+It includes a toolkit to compare current nutrient supply (from the GENuS dataset) against recommended intakes in order to establish nutrient deficiency at the population level, whether presently, historically or under certain future perturbation (i.e., coral bleaching, management, MPAs, etc.).
+Using the EAR cut point method nutrient deficiencies are estimated as % from total population. In addition, a novel algorithm to compute the amount of a certain nutrient needed to bridge this adequancy is also provided.
+More information on the EAR point cut and probability approach to calculate the nutrient defficiency of a population can be found here: https://www.ncbi.nlm.nih.gov/books/NBK222898/
+
+This datasets include functions in R to calculate the nutrient deffciency of a distrubtion of intakes using the EAR cut point method for various nutrients including the special case of iron. For the latter a combination of the probability approach (for menstruating women) and EAR cut is depolyed. For zinc, the toolkit includes a script to transfer intakes of zinc into absorbtion based on the Miller equation.
+The main script exemplifies the usage of these various function for certain nutrients for the case of Bangladesh (with an accompanying datset for Bangladesh). The dataset of Bangladesh includes the GENuS supply of nutrients per age sex groups, population size and average estimated requirements (EAR).
+Finally, a script to calculate the amount of a specific nutrient required on a population level to alleivate the burden of inadequancy within that population is also provided. This calculation can be effective in interventions to eradicate malnutrition by providing the overall amount that a certain nutrient should be supplied, which can be converted to specific food types and quantities required. 
