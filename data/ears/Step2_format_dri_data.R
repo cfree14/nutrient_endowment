@@ -92,18 +92,18 @@ vitamin_rdas <- data2_orig %>%
   rename(sex=Sex, stage=Stage, age_range=Age) %>% 
   # Gather wide-to-long
   gather(key="nutrient", value="value", 4:ncol(.)) %>% 
-  # Extract and eliminate footnote
-  mutate(footnote=gsub("[[:digit:]]|.", "", value),
+  # Format value and footnote
+  mutate(footnote=gsub("[[:digit:]]", "", value) %>% gsub(".", "", ., fixed=T),
           value=gsub("[^0-9.-]", "", value) %>% as.numeric()) %>% 
   # Add DRI type
-  mutate(dri_type=ifelse(footnote=="*", "Adequate Intakes (AI)", "Recommended Dietary Allowances (RDA)"),
+  mutate(dri_type=ifelse(footnote=="*", "Adequate Intake (AI)", "Recommended Dietary Allowance (RDA)"),
          nutrient_type="Vitamin") %>% 
   # Arrange
   select(sex:age_range, nutrient_type, nutrient, dri_type, value, footnote, everything())
 
 # Inspect data
 str(vitamin_rdas)
-
+table(vitamin_rdas$footnote)
 
 # Elements, RDAs and AIs
 ###################################
@@ -116,11 +116,11 @@ element_rdas <- data3_orig %>%
   rename(sex=Sex, stage=Stage, age_range=Age) %>% 
   # Gather wide-to-long
   gather(key="nutrient", value="value", 4:ncol(.)) %>% 
-  # Extract and eliminate footnote
-  mutate(footnote=gsub("[[:digit:]]|.", "", value),
+  # Format value and footnote
+  mutate(footnote=gsub("[[:digit:]]", "", value) %>% gsub(".", "", ., fixed=T),
          value=gsub("[^0-9.-]", "", value) %>% as.numeric()) %>% 
   # Add DRI type
-  mutate(dri_type=ifelse(footnote=="*", "Adequate Intakes (AI)", "Recommended Dietary Allowances (RDA)"),
+  mutate(dri_type=ifelse(footnote=="*", "Adequate Intake (AI)", "Recommended Dietary Allowance (RDA)"),
          nutrient_type="Element") %>% 
   # Arrange
   select(sex:age_range, nutrient_type, dri_type, value, footnote, everything())
@@ -140,9 +140,9 @@ vitamin_uls <- data5_orig %>%
   rename(sex=Sex, stage=Stage, age_range=Age) %>% 
   # Gather wide-to-long
   gather(key="nutrient", value="value", 4:ncol(.)) %>% 
-  # Format value
-  mutate(footnote=gsub("[[:digit:]]|.", "", value),
-         value=gsub("[^0-9.-]", "", value) %>% as.numeric()) %>%   
+  # Format value and footnote
+  mutate(footnote=gsub("[[:digit:]]", "", value) %>% gsub(".", "", ., fixed=T),
+         value=gsub("[^0-9.-]", "", value) %>% as.numeric()) %>% 
   # Add DRI type
   mutate(dri_type="Tolerable Upper Intake Level (UL)",
          nutrient_type="Vitamin") %>% 
@@ -163,9 +163,9 @@ element_uls <- data6_orig %>%
   rename(sex=Sex, stage=Stage, age_range=Age) %>% 
   # Gather wide-to-long
   gather(key="nutrient", value="value", 4:ncol(.)) %>% 
-  # Format value
-  mutate(footnote=gsub("[[:digit:]]|.", "", value),
-         value=gsub("[^0-9.-]", "", value) %>% as.numeric()) %>%   
+  # Format value and footnote
+  mutate(footnote=gsub("[[:digit:]]", "", value) %>% gsub(".", "", ., fixed=T),
+         value=gsub("[^0-9.-]", "", value) %>% as.numeric()) %>% 
   # Add DRI type
   mutate(dri_type="Tolerable Upper Intake Level (UL)",
          nutrient_type="Element") %>% 
@@ -187,11 +187,11 @@ macrinutr_rdas <- data4_orig %>%
   rename(sex=Sex, stage=Stage, age_range=Age) %>% 
   # Gather wide-to-long
   gather(key="nutrient", value="value", 4:ncol(.)) %>% 
-  # Extract and eliminate footnote
-  mutate(footnote=gsub("[[:digit:]]|.", "", value),
+  # Format value and footnote
+  mutate(footnote=gsub("[[:digit:]]", "", value) %>% gsub(".", "", ., fixed=T),
          value=gsub("[^0-9.-]", "", value) %>% as.numeric()) %>% 
   # Add DRI type
-  mutate(dri_type=ifelse(footnote=="*", "Adequate Intakes (AI)", "Recommended Dietary Allowances (RDA)"),
+  mutate(dri_type=ifelse(footnote=="*", "Adequate Intake (AI)", "Recommended Dietary Allowance (RDA)"),
          nutrient_type="Macronutrient") %>% 
   # Arrange
   select(sex:age_range, nutrient_type, dri_type, value, footnote, everything())
@@ -250,15 +250,29 @@ table(data1$sex_stage)
 table(data1$sex)
 table(data1$stage)
 table(data1$age_range)
-
+table(data1$dri_type)
+table(data1$footnote)
 
 # Build nutrient key
 nutrient_key <- data1 %>% 
-  group_by(nutrient_type, nutrient, units, dri_type) %>% 
-  summarize(n=sum(!is.na(value))) %>% 
-  select(-n) %>% 
-  spread(key="dri_type", value="units")
+  group_by(nutrient_type, nutrient) %>%
+  summarize(nunits=length(unique(units[!is.na(units)])),
+            units=paste(sort(unique(units)), collapse=", ")) %>% 
+  arrange(desc(nunits))
 
+# How to convert units
+# Convert choline UL from g/day to mg/day
+# Convert phosphorus UL from g/day to mg/day
+# Protein can only be converted from g/day to g/kg/day if I knew the reference body weight for each life stage
+
+# Convert units
+data2 <- data1 %>% 
+  # Convert choline/phosphorus
+  mutate(value=ifelse(nutrient%in%c("Choline", "Phosphorus") & dri_type=="Tolerable Upper Intake Level (UL)", value*1000, value),
+         units=ifelse(nutrient%in%c("Choline", "Phosphorus") & dri_type=="Tolerable Upper Intake Level (UL)", "mg/day", units))
+
+# Inspect data
+freeR::complete(data2)
 
 # Visualize data
 ################################################################################
@@ -276,18 +290,36 @@ my_theme <- theme(axis.text=element_text(size=8),
                   panel.background = element_blank(), 
                   axis.line = element_line(colour = "black"))
 
+# Plot single nutrient
+################################
+
 # Nutrient
-nutrient <- "Iron"
+nutrient_do <- "Choline"
 
 # Plot data
-g <- ggplot(data %>% filter(nutrient=="Iron"), aes(x=age_range, y=value, color=dri_type, group=dri_type)) +
+g <- ggplot(data2 %>% filter(nutrient==nutrient_do), aes(x=age_range, y=value, color=dri_type, group=dri_type)) +
   facet_grid(~sex_stage, scales="free_x", space = "free_x") +
   geom_line() +
   geom_point() + 
-  labs(x="", y="Daily recommended intake (DRI)", main=nutrient) +
+  labs(x="", y="Daily recommended intake (DRI)", title=nutrient_do) +
   theme_bw() + my_theme
 g
 
 
+# Plot nutrient group
+################################
 
+# Nutrient
+type_do <- "Vitamin"
 
+# Plot data
+g <- ggplot(data2 %>% filter(nutrient_type==type_do), aes(x=age_range, y=value, color=dri_type, group=dri_type)) +
+  facet_grid(nutrient~sex_stage, scales="free", space = "free_x") +
+  geom_line() +
+  geom_point() + 
+  labs(x="", y="Daily recommended intake (DRI)", title=type_do) +
+  theme_bw() + my_theme
+g
+
+# Export
+saveRDS(data2, file=file.path(outdir, "dietary_reference_intake_data.Rds"))
