@@ -1,0 +1,7 @@
+READ ME
+
+The PDF file was downloaded from here:
+
+The CSV files were scraped by Step1 then manually merged and formatted into the XLSX file.
+
+Step2 organize these files.
