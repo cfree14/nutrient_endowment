@@ -1,0 +1,209 @@
+"food","zinc_mg_100g","phyate_mg_100g"
+"Wheat",2.6,777
+"Rice (Milled Equivalent)",1.125,226
+"Barley",2.8,697
+"Maize",1.8,835
+"Rye",2.7,894
+"Oats",4,725
+"Millet",2.5,682
+"Sorghum",1.8,900
+"Buckwheat",3.1,1957
+"Fonio",2.1,917
+"Triticale",2.7,603
+"Mixed grain",2.64464285714286,845.214285714286
+"Cereals; nes",3.6,826
+"Popcorn",3.1,614
+"Quinoa",3.1,1180
+"Cassava",0.3,58
+"Potatoes",0.44,81.2725
+"Sweet Potatoes",0.516666666666667,25.785
+"Yams",0.416666666666667,30.155
+"Yautia (cocoyam)",0.305,45.785
+"Taro (cocoyam)",0.305,45.785
+"Roots and tubers; nes",0.35,7.84
+"Flour of roots and tubers",0.7,130
+"Sugar Cane",0,0
+"Sugar; Non-Centrifugal",0.225,0
+"Sugar (Raw Equivalent)",0,0
+"Sweeteners; Other",0.1,0
+"Honey",0.2,0
+"Beans",2.503125,559.8125
+"Peas",3.33333333333333,450
+"Broad beans; horse beans; dry",3.58,1140
+"Chick peas",2.904,573.4
+"Cow peas; dry",3.49,561.5
+"Pigeon peas",2.84,678.333333333333
+"Lentils",2.984,491.8
+"Bambara beans",1.05,285
+"Pulses; nes",2.71,339
+"Flour of pulses",4.8,938
+"Brazil nuts; with shell",4.1,3315
+"Cashew nuts; with shell",5.8,1754.5
+"Almonds; with shell",3.1,964
+"Walnuts; with shell",3.1,1001
+"Pistachios",2.42,808
+"Kolanuts",2,1000
+"Hazelnuts; with shell",2.5,575
+"Areca nuts",0.823333333333333,430.333333333333
+"Nuts; nes",4.18,883
+"Prepared nuts (exc. groundnuts)",3.28857142857143,1396.5
+"Soyabeans",4.16,792
+"Groundnuts (Shelled Eq)",3.3,1314
+"Sunflowerseed",5,2052
+"Rape and Mustardseed",6.1,2128
+"Cottonseed",6,2128
+"Coconuts - Incl Copra",1.1,620.1
+"Sesameseed",7.8,1372
+"Palmkernels",0.1,8
+"Olives",0.2,0
+"Oilcrops; Other",6.1,1943.5
+"Soyabean Oil",0,0
+"Groundnut Oil",0,0
+"Sunflowerseed Oil",0,0
+"Rape and Mustard Oil",0,0
+"Cottonseed Oil",0,0
+"Palmkernel Oil",0,0
+"Palm Oil",0,0
+"Coconut Oil",0,0
+"Sesameseed Oil",0,0
+"Olive Oil",0,0
+"Ricebran Oil",0,0
+"Maize Germ Oil",0,0
+"Oilcrops Oil; Other",0,0
+"Tomatoes",0.212857142857143,8.01
+"Onions",0.2975,7.39333333333333
+"Cabbages and other brassicas",0.287,20.732
+"Artichokes",0.4,14
+"Asparagus",0.6,20
+"Lettuce and chicory",0.2,1.7
+"Spinach",0.46,12.01
+"Cassava leaves",0.45,23
+"Cauliflowers and broccoli",0.305,9.24
+"Pumpkins; squash; and gourds",0.229,12.8635
+"Cucumbers and gherkins",0.2,2
+"Eggplants (aubergines)",0.23375,12.4475
+"Chillies and peppers; green",0.434,20.5235714285714
+"Onions (inc. shallots); green",0.895,35.51
+"Garlic",1.2,319.9
+"Leeks; other alliaceous veg.",0.1,22.46
+"Beans; green",1.65285714285714,599.721666666667
+"Peas; green",1.145,95
+"Leguminous vegetables; nes",0.703333333333333,11.6266666666667
+"String beans",0.535,5.9175
+"Carrots and turnips",0.2225,15.21
+"Okra",0.683333333333333,36.8766666666667
+"Maize; green",0.7925,103.11
+"Mushrooms and truffles",0.6075,0
+"Vegetables; fresh; nes",1.0212676056338,39.5843661971831
+"Vegetables; dried; nes",20.3566666666667,230
+"Watermelons",0.1,2.9
+"Other melons (inc. cantaloupes)",0.2,46.1
+"Coffee substitutes; cont. coffee",0,600
+"Oranges; Mandarines",0.1,26.5
+"Lemons; Limes",0.1,0
+"Grapefruit",0.1,0
+"Citrus; Other",0.1,13.25
+"Bananas",0.2,3.2
+"Plantains",0.23,40.44
+"Apples",0,65
+"Pineapples",0.1,0
+"Dates",0.3,108
+"Grapes",0.1,7.2
+"Pears",0.1,0
+"Quinces",0,0
+"Apricots",0.2,0
+"Sour cherries",0.1,0
+"Cherries",0.1,0
+"Peaches and nectarines",0.2,0
+"Plums and sloes",0.1,0
+"Stone fruit; nes",0.15,0
+"Pome fruit; nes",0.0333333333333333,21.6666666666667
+"Strawberries",0.1,11
+"Raspberries",0.4,6.5
+"Gooseberries",0.1,6.5
+"Currants",0.21,9.6
+"Blueberries",0.2,3
+"Cranberries",0.1,2
+"Berries; nes",0.11,8.97
+"Figs",0.2,30
+"Mangos; mangosteens; guavas",0.066667,51.6667
+"Avocados",0.7,141
+"Persimmons",0.1,65
+"Cashewapple",0.5,30
+"Kiwi fruit",0.1,6.5
+"Papayas",0.1,26
+"Fruit; tropical fresh; nes",0.725238095238095,52.7089473684211
+"Fresh fruit; nes",0.314705882352941,37.714375
+"Fruit dried; nes",0.41,194
+"Fruit juice; nes",0.0436363636363636,0.8
+"Fruit; prepared; nes",0.12,157.666666666667
+"Cocoa Beans",6.8,1901
+"Tea",0,0
+"Pepper",1.4,277
+"Pimento",2.5,68
+"Cloves",1.1,121
+"Vanilla",0.1,0
+"Nutmeg; mace; and cardamoms",7.5,290
+"Anise; badian; fennel; coriander",4.2,823.5
+"Ginger",4.7,290
+"Spices; nes",3.19857142857143,587
+"Wine",0.1,0
+"Beer",0,0
+"Beverages; Fermented",0.278,0
+"Beverages; Alcoholic",0,0
+"Bovine Meat",3.937,0
+"Mutton & Goat Meat",3.785,0
+"Pigmeat",1.72666666666667,0
+"Poultry Meat",1.87285714285714,NA
+"Bird meat; nes",2,0
+"Horse meat",7.58,0
+"Meat of asses",4.26,0
+"Meat of mules",4.26,0
+"Camel meat",4.26,0
+"Rabbit meat",1.77666666666667,0
+"Meat of other camelids",4.26,0
+"Game meat",2.99375,0
+"Meat; dried; nes",7.585,0
+"Meat; nes",2.5332,0
+"Snails; not sea",1,0
+"Offals of cattle; edible",2.281875,0
+"Offals of sheep; edible",1.86166666666667,0
+"Offals of goats; edible",1.86166666666667,0
+"Offals of pigs; edible",2.09428571428571,0
+"Offals; liver; chicken",3.475,0
+"Offals; liver; geese",3.315,0
+"Offals; liver; duck",3.075,0
+"Offals; nes",2.65,0
+"Butter; cow milk",0.1,0
+"Ghee; butteroil of cow milk",0,0
+"Butter of buffalo milk",0.1,0
+"Ghee oil of buffalo milk",0,0
+"Butter; ghee of sheep milk",0,0
+"Cream",0.3,0
+"Fats; Animals; Raw",0.025,0
+"Fish; Body Oil",0,0
+"Fish; Liver Oil",0,0
+"Hen eggs; in shell",1.096,0
+"Eggs; liquid",1.64,0
+"Eggs; dried",4.29,0
+"Other bird eggs; in shell",1.5,0
+"Cow milk; whole; fresh",0.4,0
+"Buffalo milk; whole; fresh",0.3,0
+"Sheep milk; whole; fresh",0.54,0
+"Goat milk; whole; fresh",0.295,0
+"Camel milk; whole; fresh",0.56,0
+"Product of natural milk constit.",0.9,0
+"Ice cream and edible ice",0.2,0
+"Freshwater Fish",1.1652380952381,0
+"Demersal Fish",0.462,0
+"Pelagic Fish",0.537333333333333,0
+"Marine Fish; Other",0.4525,0
+"Crustaceans",1.66272727272727,0
+"Cephalopods",1.84,0
+"Molluscs; Other",3.38333333333333,0
+"Aquatic Animals; Others",1,0
+"Aquatic Plants",0.91667,0
+"Wheat Flour",0.7,282
+"Corn Flour",1.8,800
+"Millet Flour",1.2,520
+"Sorghum Flour",1.6,618

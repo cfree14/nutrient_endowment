@@ -18,6 +18,7 @@ plot_natl_nutr_age_sex_rel_req <- function(nut_cntry_age_sex_2011_w_reqs, cntry,
     labs(x="", y="", title="2011 nutritional health by age and sex") +
     scale_fill_gradient2(name="Percent above or below\ndaily recommendation", 
                          midpoint = 0) +
+    guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
     # Theme
     theme_bw() + my_theme1 +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),

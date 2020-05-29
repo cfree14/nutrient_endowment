@@ -33,7 +33,7 @@ wbi_pop <- wbi %>%
 # Identify indicator codes for population by age/sex
 age_ids <- paste0("SP.POP.", c("0004", "0509", "1014", "1519", "2024",
                                "2529", "3034", "3539", "4044", "4549", "5054",
-                               "5559", "6064", "6569", "7074", "7589", "80UP"))
+                               "5559", "6064", "6569", "7074", "7579", "80UP"))
 age_sex_ids <- sort(c(paste0(age_ids, ".FE"), paste0(age_ids, ".MA")))
 
 # 2011 population by country and age/sex
@@ -65,6 +65,14 @@ pop_2011_agesex <- pop_2011_agesex_orig %>%
   # Add age and sex
   mutate(sex=ifelse(grepl("female", indicator), "female", "male"),
          age=gsub("Population ages |, female|, male", "", indicator)) %>% 
+  # Format age
+  mutate(age=recode(age, 
+                    "00-04"="0-4", 
+                    "05-09"="5-9",
+                    "80 and above"="80+"),
+         age=factor(age, levels=c("0-4", "5-9", "10-14", "15-19", "20-24",
+                                  "25-29", "30-34", "35-39", "40-44", "45-49", "50-54",
+                                  "55-59", "60-64", "65-69", "70-74", "75-79", "80+"))) %>% 
   # Arrange
   select(country_orig, iso3_orig, iso2_orig, country_use, iso3_use, year, 
          indicatorID, indicator, sex, age, sex,

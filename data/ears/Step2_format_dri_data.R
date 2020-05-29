@@ -221,7 +221,9 @@ data1 <- bind_rows(ears,
          units=recode(units, "ug/d"="µg/d")) %>% 
   # Extract nutrient
   mutate(nutrient=sub("\\(.*", "", nutrient_units) %>% trimws()) %>% 
-  mutate(nutrient=recode(nutrient, "a-Linolenic acid"="α-Linolenic acid")) %>% 
+  mutate(nutrient=recode(nutrient, 
+                         "a-Linolenic acid"="α-Linolenic acid",
+                         "Carbohydrate"="Carbohydrates")) %>% 
   # Make ages a factor
   mutate(age_range=factor(age_range, levels=age_groups)) %>% 
   # Make sex-stage
@@ -269,7 +271,7 @@ nutrient_key <- data1 %>%
 data2 <- data1 %>% 
   # Convert choline/phosphorus
   mutate(value=ifelse(nutrient%in%c("Choline", "Phosphorus") & dri_type=="Tolerable Upper Intake Level (UL)", value*1000, value),
-         units=ifelse(nutrient%in%c("Choline", "Phosphorus") & dri_type=="Tolerable Upper Intake Level (UL)", "mg/day", units))
+         units=ifelse(nutrient%in%c("Choline", "Phosphorus") & dri_type=="Tolerable Upper Intake Level (UL)", "mg/d", units))
 
 # Inspect data
 freeR::complete(data2)

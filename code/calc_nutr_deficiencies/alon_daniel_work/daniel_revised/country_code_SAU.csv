@@ -1,0 +1,157 @@
+country_name,country_ISO,country_code
+Albania,ALB,8
+Algeria,DZA,12
+American Samoa,ASM,16
+Anguilla (UK),AIA,660
+Antigua & Barbuda,ATG,28
+Argentina,ARG,32
+Aruba (Netherlands),ABW,533
+Australia,AUS,36
+Bahamas,BHS,44
+Bahrain,BHR,48
+Bangladesh,BGD,50
+Barbados,BRB,52
+Belgium,BEL,56
+Belize,BLZ,84
+Benin,BEN,204
+Bermuda (UK),BMU,60
+Bonaire (Netherlands),BES,535
+Brazil,BRA,76
+Brit. Indian Ocean Terr. (UK),IOT,86
+British Virgin Isl. (UK),VGB,92
+Brunei Darussalam,BRN,96
+Bulgaria,BGR,100
+Cambodia,KHM,116
+Canada,CAN,124
+Cayman Isl. (UK),CYM,136
+Chile,CHL,152
+China,CHN,156
+Christmas Isl. (Australia),AUS,36
+Cocos (Keeling) Isl. (Australia),AUS,36
+Colombia,COL,170
+Comoros,COM,174
+Cook Islands,COK,184
+Costa Rica,CRI,188
+Croatia,HRV,191
+Cuba,CUB,192
+Curacao,CUW,531
+Denmark,DNK,208
+Djibouti,DJI,262
+Dominica,DMA,212
+Dominican Republic,DOM,214
+Ecuador,ECU,218
+Egypt,EGY,818
+El Salvador,SLV,222
+Eritrea,ERI,232
+Estonia,EST,233
+Faeroe Isl. (Denmark),FRO,234
+Fiji,FJI,242
+France,FRA,250
+French Polynesia,PYF,258
+Germany,DEU,276
+Greece,GRC,300
+Greenland,GRL,304
+Grenada,GRD,308
+Guadeloupe  (France),GLP,312
+Guam (USA),GUM,316
+Guatemala,GTM,320
+Guyana,GUY,328
+Haiti,HTI,332
+Honduras,HND,340
+Hong Kong,HKG,344
+India,IND,356
+Indonesia,IDN,360
+Iran,IRN,364
+Iraq,IRQ,368
+Ireland,IRL,372
+Israel,ISR,376
+Italy,ITA,380
+Jamaica,JAM,388
+Japan,JPN,392
+Jordan,JOR,400
+Kenya,KEN,404
+Kiribati,KIR,296
+Korea (South),KOR,410
+Kuwait,KWT,414
+Latvia,LVA,428
+Liberia,LBR,430
+Libya,LBY,434
+Lithuania,LTU,440
+Madagascar,MDG,450
+Malaysia,MYS,458
+Maldives,MDV,462
+Marshall Isl.,MHL,584
+Martinique (France),MTQ,474
+Mauritius,MUS,480
+Mayotte (France),MYT,175
+Mexico,MEX,484
+Micronesia,FSM,583
+Montserrat (UK),MSR,500
+Mozambique,MOZ,508
+Myanmar,MMR,104
+Namibia,NAM,516
+Nauru,NRU,520
+Netherlands,NLD,528
+New Caledonia (France),NCL,540
+New Zealand,NZL,554
+Nicaragua,NIC,558
+Niue (New Zealand),NIU,570
+Norfolk Isl. (Australia),NFK,574
+North Marianas (USA),MNP,580
+Norway,NOR,578
+Oman,OMN,512
+Pakistan,PAK,586
+Palau,PLW,585
+Panama,PAN,591
+Papua New Guinea,PNG,598
+Peru,PER,604
+Philippines,PHL,608
+Poland,POL,616
+Portugal,PRT,620
+Puerto Rico (USA),PRI,630
+Qatar,QAT,634
+Reunion,REU,638
+Russian Federation,RUS,643
+Saba and Saint Eustaius (Netherlands),NLD,528
+Saint Kitts & Nevis,KNA,659
+Saint Lucia,LCA,662
+Saint Vincent & the Grenadines,VCT,670
+Samoa,WSM,882
+Sao Tome & Principe,STP,678
+Saudi Arabia,SAU,682
+Senegal,SEN,686
+Seychelles,SYC,690
+Sierra Leone,SLE,694
+Singapore,SGP,702
+Sint Maarten,SXM,534
+Solomon Isl.,SLB,90
+Somalia,SOM,706
+South Africa,ZAF,710
+South Cyprus,CYP,196
+Spain,ESP,724
+Sri Lanka,LKA,144
+St Martin,MAF,663
+Sudan,SDN,729
+Suriname,SUR,740
+Sweden,SWE,752
+Taiwan,TWN,158
+Tanzania,TZA,834
+Thailand,THA,764
+Timor Leste,TLS,626
+Togo,TGO,768
+Tonga,TON,776
+Trinidad & Tobago,TTO,780
+Turks & Caicos Isl. (UK),TCA,796
+Tuvalu,TUV,798
+Ukraine,UKR,804
+United Arab Emirates,ARE,784
+United Kingdom,GBR,826
+Unknown Fishing Country,UFC,0
+Uruguay,URY,858
+US Virgin Isl.,VIR,850
+USA,USA,840
+Vanuatu,VUT,548
+Venezuela,VEN,862
+Viet Nam,VNM,704
+Wallis & Futuna Isl. (France),WLF,876
+Yemen,YEM,887

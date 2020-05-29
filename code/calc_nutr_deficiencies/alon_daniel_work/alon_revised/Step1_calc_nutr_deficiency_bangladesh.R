@@ -10,8 +10,8 @@ library(ggplot2)
 library(tidyverse)
 
 # Directories
-datadir <- "code/calc_nutr_deficiencies/alon_revised/data"
-codedir <- "code/calc_nutr_deficiencies/alon_revised/functions"
+datadir <- "code/calc_nutr_deficiencies/alon_daniel_work/alon_revised/data"
+codedir <- "code/calc_nutr_deficiencies/alon_daniel_work/alon_revised/functions"
 
 # Read helper functions
 sapply(list.files(codedir, pattern=".R"), function(x) source(file.path(codedir, x)))
@@ -43,6 +43,10 @@ CV_protein_in <- Nut_protein*CV
 deficiency_protein <- EAR_CUT(Nut_protein, CV_protein_in, EAR_protein) # fraction of nutrient deficiencies per age-sex group
 deficiency_protein_averaged <- sum(deficiency_protein*population)/sum(population)*100 # in percentage
 
+# Check Alon's results against my results
+deficiency_protein1 <- calc_nutr_deficiency(nutrient="Protein", supply_vec=Nut_protein, ear_vec=EAR_protein, cv=0.25)
+deficiency_protein - deficiency_protein1
+
 
 # Vitamin A
 ################################
@@ -56,6 +60,10 @@ CV_vitaminA_in <- Nut_vitaminA*CV
 # Perform calculations
 deficiency_vitaminA <- EAR_CUT(Nut_vitaminA,CV_vitaminA_in,EAR_vitaminA)
 deficiency_vitaminA_averaged <- sum(deficiency_vitaminA*population)/sum(population)*100 # in percentage
+
+# Check Alon's results against my results
+deficiency_vitaminA <- calc_nutr_deficiency(nutrient="Vitamin A", supply_vec=Nut_vitaminA, ear_vec=EAR_vitaminA, cv=0.25)
+deficiency_vitaminA - deficiency_vitaminA
 
 
 # Zinc
@@ -75,6 +83,8 @@ deficiency_zinc <- EAR_CUT(TAZ,CV_zinc_in,EAR_zinc)
 deficiency_zinc_averaged <- sum(deficiency_zinc*population)/sum(population)*100 #in percentage
 
 
+
+
 # Iron
 ################################
 
@@ -89,5 +99,10 @@ bioavailability <- 0.12
 deficiency_iron <- EAR_prob_Iron(Nut_iron,CV_iron_in,EAR_iron,bioavailability)
 deficiency_iron_averaged <- sum(deficiency_iron*population)/sum(population)*100 #in percentage
 
-
+# Check Alon's results against my results
+mn_vec <- 1:length(Nut_iron)
+mn_index <- c(5,7,9,11,13,15,17)
+mn_vec <- ifelse(mn_vec %in% mn_index, "menstruating", "non-menstruating")
+deficiency_iron <- calc_nutr_deficiency(nutrient="Iron", supply_vec=Nut_iron, ear_vec=EAR_iron, mn_vec=mn_vec, cv=0.25)
+deficiency_iron - deficiency_iron
 
