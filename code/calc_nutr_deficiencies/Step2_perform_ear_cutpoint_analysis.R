@@ -54,11 +54,14 @@ data <- data_orig %>%
          nhealthy=phealthy*pop_size)
 
 # For testing
-exdata <- data_orig %>% 
-  filter(country=="Bangladesh" & nutrient=="Zinc")
-supply_vec <- exdata$supply_med
-nutrient <- "Zinc"
-ear_vec <- exdata$ear
+# exdata <- data_orig %>% 
+#   filter(country=="Bangladesh" & nutrient=="Zinc")
+# supply_vec <- exdata$supply_med
+# nutrient <- "Zinc"
+# ear_vec <- exdata$ear
+
+# Export data
+saveRDS(data, file=file.path(datadir, "nutr_deficiencies_by_cntry_sex_age_2011.Rds"))
 
 
 
