@@ -43,6 +43,8 @@ data <- data_orig %>%
   # Add menstruating/non-menstruating
   mutate(menstruation=ifelse(sex=="Women" & age %in% mn_ages, "menstruating", "non-menstruating")) %>% 
   select(iso3:age, menstruation, everything()) %>% 
+  # Calculate supply standard deviation
+  # mutate(supply_sd=calc_sd_from_ci(mu=supply_med, lci=supply_lo, uci=supply_hi))
   # Calculate nutrient deficiencies
   group_by(nutrient) %>% 
   mutate(pdeficient=calc_nutr_deficiency(nutrient=unique(nutrient), 
@@ -51,7 +53,10 @@ data <- data_orig %>%
                                          cv=0.25),
          phealthy=1-pdeficient,
          ndeficient=pdeficient*pop_size,
-         nhealthy=phealthy*pop_size)
+         nhealthy=phealthy*pop_size) %>% 
+  ungroup() %>% 
+  # Calculate mean nutrient intake requirement
+  mutate(intake_avg_req=sapply(ear, function(x) calc_nutr_demand(ptarget=0.05, x)))
 
 # For testing
 # exdata <- data_orig %>% 
