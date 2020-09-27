@@ -14,10 +14,14 @@ library(rnaturalearth)
 # Directories
 outdir <- "output"
 genusdir <- "data/genus/processed"
+earsdir <- "data/ears/data" 
 usdietdir <- "data/us_dietary_guidelines"
 vaitladir <- "data/vaitla_etal_2018/processed"
 popsizedir <- "data/population_growth/processed"
 appdatadir <- "shiny/v2/data"
+
+# Read DRIs data
+dris_orig <- readRDS(file.path(earsdir, "dietary_reference_intake_data.Rds"))
 
 # Read US dietary guidelines
 load(file.path(usdietdir, "2015_2020_US_dietary_guidelines.Rdata"))
@@ -30,6 +34,63 @@ nut_cntry_yr_orig <- readRDS(file.path(genusdir, "genus_nutrient_supplies_by_cnt
 nut_cntry_age_sex_2011_orig <- readRDS(file.path(genusdir, "genus_nutrient_supplies_by_age_sex_2011.Rds"))
 food_cntry_yr_orig <- readRDS(file.path(genusdir, "genus_edible_food_by_cntry_year.Rds"))
 nut_cntry_food_2011_orig <- readRDS(file.path(genusdir, "genus_nutrient_supplies_by_cntry_food_2011.Rds"))
+
+
+# Format DRIs to match genus
+################################################################################
+
+# Separate children and duplicate
+dris_nosex <- dris_orig %>% 
+  filter(stage %in% c("Infants", "Children"))
+dris_nosex_dup <- bind_rows(dris_nosex %>% mutate(sex="Males"), 
+                            dris_nosex %>% mutate(sex="Females"))
+
+# Add duplicated children back in
+dris <- dris_orig %>% 
+  filter(sex %in% c("Males", "Females") & stage=="None") %>% 
+  bind_rows(dris_nosex_dup) %>% 
+  arrange(nutrient_type, nutrient, sex, age_range) %>% 
+  select(-c(sex_stage, stage))
+
+# Create key to match DRIs to
+age_groups <- c(paste(seq(0,75,5), seq(4, 79, 5), sep="-"), "80+")
+sex_age_key <- expand.grid(sex=c("Males", "Females"), 
+                           age_range=age_groups) %>% 
+  arrange(sex, age_range) %>% 
+  mutate(age_range_dri=recode(age_range, 
+                              "0-4"="1-3 yr",
+                              "5-9"="4-8 yr",
+                              "10-14"="9-13 yr",
+                              "15-19"="14-18 yr",
+                              "20-24"="19-30 yr",
+                              "25-39"="19-30 yr",
+                              "30-34"="31-50 yr",
+                              "35-39"="31-50 yr",
+                              "40-44"="31-50 yr",
+                              "45-49"="31-50 yr",
+                              "50-54"="51-70 yr",
+                              "55-59"="51-70 yr",
+                              "60-64"="51-70 yr",
+                              "65-64"="51-70 yr",
+                              "70-64"=">70 yr",
+                              "78-64"=">70 yr",
+                              "80+"=">70 yr"))
+
+# Final data
+dris2genus <- sex_age_key %>% 
+  # Expand DRI key to match GENUS age/sex groups
+  full_join(dris, by=c("sex", "age_range_dri"="age_range")) %>% 
+  arrange(nutrient_type, nutrient, sex, age_range) %>% 
+  # Remove infants
+  filter(!age_range_dri%in%c("0-6 mo", "6-12 mo")) %>% 
+  # Format sex
+  mutate(sex=recode(sex, "Males"="Men", "Females"="Women")) %>% 
+  # Convert units
+  mutate(nutrient_units=recode(nutrient_units, "Copper (ug/d)"="Copper (mg/d)"),
+         value=ifelse(nutrient=="Copper", value/1000, value),
+         units=ifelse(nutrient=="Copper", "mg/d", units))
+  
+saveRDS(dris2genus, file.path(appdatadir, "DRIs_matched_to_genus_age_sex_groups.Rds"))
 
 
 # Format nutrient content of catch

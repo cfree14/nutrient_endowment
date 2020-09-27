@@ -14,6 +14,7 @@ library(rnaturalearth)
 # Directories
 tabledir <- "tables"
 genusdir <- "data/genus/processed"
+earsdir <- "data/ears/data" 
 usdietdir <- "data/us_dietary_guidelines"
 outputdir <- "shiny/v2/data"
 
@@ -29,6 +30,9 @@ load(file.path(usdietdir, "2015_2020_US_dietary_guidelines.Rdata"))
 diet_reqs_orig <- data
 diet_reqs_catg_orig <- data_catg
 rm(data, data_catg)
+
+# Read DRIs data
+ears <- readRDS(file.path(earsdir, "dietary_reference_intake_data.Rds"))
 
 
 # Compare units

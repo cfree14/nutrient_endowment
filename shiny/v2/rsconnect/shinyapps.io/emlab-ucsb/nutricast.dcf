@@ -5,8 +5,8 @@ account: emlab-ucsb
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1942457
-bundleId: 2997950
+bundleId: 3421617
 url: https://emlab-ucsb.shinyapps.io/nutricast/
-when: 1586551521.49406
+when: 1595429225.17809
 asMultiple: FALSE
 asStatic: FALSE

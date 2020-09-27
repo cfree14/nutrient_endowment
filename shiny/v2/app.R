@@ -44,9 +44,16 @@ nut_cntry_age_sex_2011_w_reqs <- readRDS(file.path(datadir, "genus_nutrient_supp
 pdiet_seafood_cntry_yr <- readRDS(file.path(datadir, "genus_pdiet_seafood_by_cntry_year.Rds"))
 pnutrient_seafood_cntry_2011 <- readRDS(file.path(datadir, "genus_pnutrient_seafood_by_cntry_2011.Rds"))
 
+# DRIs data
+dris <- readRDS(file.path(datadir, "DRIs_matched_to_genus_age_sex_groups.Rds")) %>% 
+  filter(nutrient!="Protein")
+  
 # Read catch nutrient data
 fao_catch_nutr_cntry <- readRDS(file.path(datadir, "FAO_catch_nutrient_hist_by_cntry.Rds"))
 gaines_catch_nutr_cntry <- readRDS(file.path(datadir, "Free_etal_catch_nutrient_proj_by_scen_rcp_cntry.Rds"))
+
+# Read nutrient deficiency estimates
+nutr_defs <- readRDS(file.path(datadir, "nutr_deficiencies_by_cntry_sex_age_2011.Rds"))
 
 # FAO countries with data
 fao_countries <- fao %>% 
@@ -135,8 +142,9 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            
            # National nutritional health by age/sex
            h2("National nutritional health by age and sex"),
-           p("The figure below illustrates national nutritional intake by age and sex relative to the levels recommended by the U.S. Dietary Guidelines (USDHHS 2015). Red shading indicates groups with median consumption below the recommended amounts and blue shading indicates groups with median consumption above the recommended amounts. For sodium, the recommended amount represents a daily upper limit that should not be exceeded (i.e., for sodium, red shading indicates a healthy diet but for the remaining nutrients, red shading indicates a deficient diet)."),
-           plotOutput(outputId="natl_nutr_age_sex_rel_req", width=1000, height=600),
+           p("The figure below illustrates national nutritional deficiencies by age and sex calculated using the Estimated Average Requirement (EAR) cutpoint method (National Academy 2000). Deeper orange shading indicates a higher proportion of individuals within an age-sex group that are deficient in each nutrient. The EAR is the average daily nutrient intake level estimated to meet the requirements of half of the healthy individuals in a group."),
+           # plotOutput(outputId="natl_nutr_age_sex_rel_req", width=1000, height=600),
+           plotOutput(outputId="raster_perc_deficient1", width=1000, height=600),
            br(),
            
            # Macronutrients
@@ -144,10 +152,9 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            
            # Header
            h2("National nutrient consumption profiles"),
-           p("In the section below, we provide a brief description of the functions and sources of each of the 23 nutrients as well as a more detailed presentation of teir availability. In each figure, the left panel shows a time series of median daily per capita consumption of the nutrient (plus 95% confidence interval) from 1960 to 2011 and the right panel shows the median daily per capita consumption by age and sexin 2011 relatve to the levels recommended by the U.S. Dietary Guidelines (black lines and points; USDHHS 2015). "),
-           p("For sodium, the recommended amount represents a daily upper limit that should not be exceeded (i.e., for sodium, consumption below the recommended level indicates a healthy diet but for the remaining nutrients, consumption below the recommended level indicates a deficient diet). The U.S. Dietary Guidelines do not provide recommendations for daily per capita consumption of fat or fatty acids (which should both be limited) or calories (which varies by activity level)."),
+           p("In the section below, we provide a brief description of the functions and sources of each of the 23 nutrients as well as a more detailed presentation of their availability. In each figure, the left panel shows a time series of median daily per capita consumption of the nutrient (plus 95% confidence interval) from 1960 to 2011 and the right panel shows the median daily per capita consumption by age and sex in 2011 relative to the Estimated Average Requirement (EAR). The EAR is the average daily nutrient intake level estimated to meet the requirements of half of the healthy individuals in a group."),
            br(),
-           
+      
            # Header
            h2("Macronutrients"),
            
@@ -306,8 +313,8 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            
            # References
            h2("References"),
-           p("Smith MR, Micha R, Golden CD, Mozaffarian D, Myers SS (2016) Global Expanded Nutrient Supply (GENuS) model: a new method for estimating the global dietary supply of nutrients. PLoS One 11(1): e0146976. https://doi.org/10.1371/journal.pone.0146976"), 
-           p("USDHHS & USDA (2015) 2015–2020 Dietary Guidelines for Americans. 8th Edition. U.S. Department of Health and Human Services (USDHHS) and U.S. Department of Agriculture (USDA). Washington, D.C. Available at: http://health.gov/dietaryguidelines/2015/guidelines/")
+           p("National Academy. 2000. Dietary Reference Intakes: Applications in Dietary Assessment. Page 9956. National Academies Press, Washington, D.C. Available from http://www.nap.edu/catalog/9956 (accessed May 29, 2020)."),
+           p("Smith MR, Micha R, Golden CD, Mozaffarian D, Myers SS (2016) Global Expanded Nutrient Supply (GENuS) model: a new method for estimating the global dietary supply of nutrients. PLoS One 11(1): e0146976. https://doi.org/10.1371/journal.pone.0146976")
            
            ),
   
@@ -359,7 +366,31 @@ ui <- navbarPage("Climate change, fisheries, and nutrition web explorer",
            ),
   
   # 5. Fish nutrition data
-  tabPanel("National report cards")
+  tabPanel("National report cards",
+           
+           # Select a country
+           selectInput("country3",
+                       "Select a country:",
+                       choices=genus_countries, multiple=F, selectize=F),
+           
+           # Nutrient deficiencies (sensitivity)"
+           h2("Nutrient deficiencies (sensitivity)"),
+           
+           # Figure 1
+           p("The percentage of the population determined to be nutrient deficient using the EAR cutpoint method by sex and age group."),
+           plotOutput(outputId = "raster_perc_deficient", width=1000, height=600),
+           br(),
+           
+           # Figure 2
+           p("The number of people determined to be nutrient deficient using the EAR cutpoint method by sex and age group. The solid bars indicate the number of healthy people while the transparent bars indicate the number of nutrient deficient people in each sex and age group."),
+           plotOutput(outputId = "barplot_n_deficient", width=1000, height=1000),
+           br(),
+           
+           # Figure 3
+           p("Hindcast and forecast nutrient amount required to erase deficiency."),
+           br(),
+           
+           )
 
 )
 
@@ -413,41 +444,49 @@ server <- function(input, output){
     g
   })
   
+  # Percent deficient by age/group
+  output$raster_perc_deficient1 <- renderPlot({
+    g <-   plot_raster_perc_deficient(data=nutr_defs, 
+                                      country=input$country,
+                                      my_theme=my_theme1)
+    g
+  })
+  
   # Seafood nutrients
   #####################################
   
   output$natl_nutr_stats_protein <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Protein")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Protein", dris=dris)
     g
   })
   
   output$natl_nutr_stats_fat <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Fat")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Fat", dris=dris)
     g
   })
 
   output$natl_nutr_stats_pfacids <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Polyunsaturated fatty acids")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Polyunsaturated fatty acids", dris=dris)
     g
   })
 
   output$natl_nutr_stats_iron <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Iron")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Iron", dris=dris)
     g
   })
 
   output$natl_nutr_stats_zinc <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Zinc")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Zinc", dris=dris)
     g
   })
 
   output$natl_nutr_stats_vitA <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Vitamin A")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Vitamin A", dris=dris)
     g
   })
 
   output$natl_nutr_stats_vitC <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Vitamin C")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Vitamin C", dris=dris)
     g
   })
   
@@ -455,97 +494,83 @@ server <- function(input, output){
   #####################################
   
   output$natl_nutr_stats_calcium <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Calcium")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Calcium", dris=dris)
     g
   })
   
   output$natl_nutr_stats_calories <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Calories")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Calories", dris=dris)
     g
   })
   
   output$natl_nutr_stats_carbs <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Carbohydrates")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Carbohydrates", dris=dris)
     g
   })
   
   output$natl_nutr_stats_copper <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Copper")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Copper", dris=dris)
     g
   })
   
   output$natl_nutr_stats_fiber <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Dietary fiber")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Dietary fiber", dris=dris)
     g
   })
   
   output$natl_nutr_stats_folate <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Folate")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Folate", dris=dris)
     g
   })
   
   output$natl_nutr_stats_magnesium <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Magnesium")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Magnesium", dris=dris)
     g
   })
   
   output$natl_nutr_stats_mfacids <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Monounsaturated fatty acids")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Monounsaturated fatty acids", dris=dris)
     g
   })
   
   output$natl_nutr_stats_niacin <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Niacin")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Niacin", dris=dris)
     g
   })
   
   output$natl_nutr_stats_phos <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Phosphorus")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Phosphorus", dris=dris)
     g
   })
   
   output$natl_nutr_stats_potassium <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Potassium")
-    g
-  })
-  
-  output$natl_nutr_stats_potassium <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Potassium")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Potassium", dris=dris)
     g
   })
   
   output$natl_nutr_stats_ribo <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Riboflavin")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Riboflavin", dris=dris)
     g
   })
   
-  output$natl_nutr_stats_ribo <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Riboflavin")
-    g
-  })
   
   output$natl_nutr_stats_sfacids <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Saturated fatty acids")
-    g
-  })
-  
-  output$natl_nutr_stats_sfacids <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Saturated fatty acids")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Saturated fatty acids", dris=dris)
     g
   })
   
   output$natl_nutr_stats_sodium <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Sodium")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Sodium", dris=dris)
     g
   })
   
   output$natl_nutr_stats_thiamin <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Thiamin")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Thiamin", dris=dris)
     g
   })
   
   output$natl_nutr_stats_vitb6 <- renderPlot({
-    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Vitamin B6")
+    g <- plot_natl_nutrient_supply(nut_cntry_yr, nut_cntry_age_sex_2011_w_reqs, cntry=input$country, nutr="Vitamin B6", dris=dris)
     g
   })
   
@@ -583,8 +608,27 @@ server <- function(input, output){
     g
   })
   
-  
+  # Report card
+  ######################################################################
 
+  # Percent deficient by age/group
+  output$raster_perc_deficient <- renderPlot({
+    g <-   plot_raster_perc_deficient(data=nutr_defs, 
+                                     country=input$country3,
+                                     my_theme=my_theme1)
+    g
+  })
+  
+  # Number of people deficient by age/group
+  output$barplot_n_deficient <- renderPlot({
+    g <-   plot_barplot_n_deficient(data=nutr_defs, 
+                                      country=input$country3,
+                                      my_theme=my_theme1)
+    g
+  })
+  
+  
+  
 }
 
 shinyApp(ui = ui, server = server)

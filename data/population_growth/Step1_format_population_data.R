@@ -228,7 +228,7 @@ pop_proj_cntry2 <- pop_proj_cntry %>%
   # Add ISO3/country name
   mutate(country_use=countrycode(country_orig %>% recode("Eswatini"="Swaziland"), 
                                  "country.name", "country.name"), 
-         iso3_use=countrycode(country_use, "country.name", "country.name")) %>% 
+         iso3_use=countrycode(country_use, "country.name", "iso3c")) %>% 
   # Arrange
   select(country_orig, country_use, iso3_use, everything()) %>% 
   arrange(country_use, year)
@@ -271,7 +271,7 @@ pop_hist_merge <- pop_hist %>%
 # Format future for merge
 pop_proj_merge <- pop_proj_cntry2 %>% 
   select(country_use, iso3_use, year, pop_size_05perc:pop_size_95perc) %>% 
-  mutate(source="World Bank historical") %>% 
+  mutate(source="UN WPP projections") %>% 
   rename(iso3=iso3_use, country=country_use) %>% 
   select(source, country, iso3, year, pop_size_05perc:pop_size_95perc)
 
