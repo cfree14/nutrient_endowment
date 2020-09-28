@@ -65,6 +65,30 @@ pop_proj_orig <- purrr::map_df(1:5, function(x) {
 # Format data
 #####################################
 
+# Age levels
+sort(unique(pop_proj_orig$age_range))
+ages <- c("0-4",
+          "5-9",
+          "10-14",
+          "15-19",
+          "20-24",
+          "25-29",
+          "30-34",
+          "35-39",
+          "40-44",
+          "45-49",
+          "50-54",
+          "55-59",
+          "60-64",
+          "65-69",
+          "70-74",
+          "75-79",
+          "80-84",
+          "85-89",
+          "90-94",
+          "95-99",
+          "100+")
+
 # Format merged data
 pop_proj <- pop_proj_orig %>% 
   # Convert population size to number of people
@@ -155,13 +179,12 @@ g <- ggplot(sdata, aes(x=year, y=pop_size_50perc/1e6, fill=sex, alpha=age_range)
 g
 
 
+# Export
+save(pop_proj_cntry, pop_proj_cntry2,
+     pop_proj_subregion, pop_proj_region, pop_proj_world,
+     pop_proj_sdg_region, pop_proj_sdg_subregion,
+     pop_proj_devgroup, pop_proj_incgroup, pop_proj_other,
+     file=file.path(outdir, "UN_WPP_2019_population_projections_all.Rdata"))
 
-
-
-# # Export
-# save(pop_proj_cntry, pop_proj_cntry2,
-#      pop_proj_subregion, pop_proj_region, pop_proj_world,
-#      pop_proj_sdg_region, pop_proj_sdg_subregion,
-#      pop_proj_devgroup, pop_proj_incgroup, pop_proj_other,
-#      file=file.path(outdir, "UN_WPP_2019_population_projections.Rdata"))
+saveRDS(pop_proj_cntry2, file=file.path(outdir, "UN_WPP_2019_pop_proj_by_cntry_agesex.Rds"))
 

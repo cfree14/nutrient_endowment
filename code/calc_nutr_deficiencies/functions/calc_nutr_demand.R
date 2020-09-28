@@ -1,6 +1,6 @@
 
 
-# ptarget <- 0.05; pop <- 20000; ear <- 10; intake_cv=0.25
+# ptarget <- 0.05; ear <- 10; intake_cv=0.25
 calc_nutr_demand <- function(ptarget, ear, intake_cv=0.25, plot=F){
   
   # Calculate difference between p(deficient) target

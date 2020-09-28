@@ -1,5 +1,5 @@
 
-# Plot raster
+# Plot bar plot
 plot_barplot_n_deficient <- function(data, country, my_theme=my_theme1){
   
   # Format data for plotting
