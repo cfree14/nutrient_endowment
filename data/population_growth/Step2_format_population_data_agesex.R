@@ -158,7 +158,7 @@ pop_proj_cntry2 <- pop_proj_cntry %>%
   # Add ISO3/country name
   mutate(country_use=countrycode(country_orig %>% recode("Eswatini"="Swaziland"), 
                                  "country.name", "country.name"), 
-         iso3_use=countrycode(country_use, "country.name", "country.name")) %>% 
+         iso3_use=countrycode(country_use, "country.name", "iso3c")) %>% 
   # Arrange
   select(country_orig, country_use, iso3_use, everything()) %>% 
   arrange(country_use, year)
